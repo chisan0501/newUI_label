@@ -9,6 +9,7 @@ namespace modern_label
     class LabelModel
     {
         public List<string> users { get; set; }
+       
         public List<string> db_select { get; set; }
         public bool is_mysql_open { get; set; }
         public string mysql_status { get; set; }

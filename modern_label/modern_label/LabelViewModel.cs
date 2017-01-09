@@ -19,11 +19,15 @@ namespace modern_label
 
                 switch (propName) {
                     case "Asset_tag":
-                        string a = this.asset_tag;
+                        
                         var discovery_result = new discovery_result(this.asset_tag);
                         break;
+                    case "Users_SelectedValue":
+                        Welcome_text = this.Users_SelectedValue;
                         
-
+                        break;
+                    
+                    
 
                 }
                 
@@ -74,6 +78,24 @@ namespace modern_label
             }
             
         }
+
+        private string welcome_text;
+        public string Welcome_text
+        {
+
+            get { return "Hello " + welcome_text; }
+            set {
+                if(value != welcome_text)
+                {
+                    welcome_text = value;
+                    RaisePropertyChanged("Welcome_text");
+                }
+               
+             
+
+            }
+        }
+
         private string asset_tag;
         public string Asset_tag
         {
@@ -94,11 +116,23 @@ namespace modern_label
 
         }
 
+        private string users_SelectedValue;
+        public string Users_SelectedValue
+        {
+            get { return this.users_SelectedValue; }
+            set { this.users_SelectedValue = value;
+                RaisePropertyChanged("Users_SelectedValue");
+            }
+
+
+        }
+
         public List<string> Users
         {
             get { return LabelModel.users; }
             set { LabelModel.users = value;
                 RaisePropertyChanged("Users");
+               
             }
 
         }

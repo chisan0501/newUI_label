@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,10 @@ namespace modern_label
             bool is_online = false;
             try
             {
+                
+
+                
+                
                 var sqlite_connect = new SQLiteConnection("Data source=Z:\\inventory.db3;FailIfMissing=True");
                 sqlite_connect.Open();
                 is_online = true;

@@ -39,6 +39,7 @@ namespace modern_label
             sqlite_status.DataContext = labelViewModel;
             mysql_status.DataContext = labelViewModel;
             db_select.DataContext = labelViewModel;
+            welcome_textbox.DataContext = labelViewModel;
         }
 
         private void Tile_Click(object sender, RoutedEventArgs e)
