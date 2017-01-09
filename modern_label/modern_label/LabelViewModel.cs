@@ -1,10 +1,12 @@
-﻿using MySql.Data.MySqlClient;
+﻿using MahApps.Metro.Controls.Dialogs;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace modern_label
 {
@@ -24,10 +26,31 @@ namespace modern_label
                         break;
                     case "Users_SelectedValue":
                         Welcome_text = this.Users_SelectedValue;
-                        
+                     
                         break;
-                    
-                    
+                    case "Db_select_item":
+                    switch (Db_select_item)
+                        {
+                            case ("MYSQL"):
+                                this.enable_history_btn = true;
+                               
+                                var user_list = mysql_data.users();
+                                Users.Clear();
+                                Users = user_list.users;
+
+                                break;
+
+
+                            case ("SQLite"):
+
+                                this.enable_history_btn = false;
+                                var sql_lite_user_list = sqlite_data.users();
+                                Users.Clear();
+                                Users = sql_lite_user_list.users;
+                                break;
+                        }
+                        break;
+
 
                 }
                 
@@ -79,6 +102,37 @@ namespace modern_label
             
         }
 
+        private string db_select_item;
+        public string Db_select_item
+        {
+            get { return db_select_item; }
+            set
+            {
+                if (value != db_select_item)
+                {
+                    db_select_item = value;
+                    RaisePropertyChanged("Db_select_item");
+                }
+            }
+
+        }
+
+        private Boolean enable_history_btn;
+        public Boolean Enable_history_btn
+        {
+            get { return enable_history_btn; }
+            set { 
+                if (value != enable_history_btn)
+                {
+                    enable_history_btn = value;
+                   
+                    RaisePropertyChanged("Enable_history_btn");
+                }
+                    
+                    
+                } 
+
+        }
         private string welcome_text;
         public string Welcome_text
         {

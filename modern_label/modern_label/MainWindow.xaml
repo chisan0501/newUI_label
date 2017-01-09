@@ -1,5 +1,7 @@
 ﻿<Controls:MetroWindow xmlns:Dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"  x:Class="modern_label.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                       xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+                       Dialog:DialogParticipation.Register="{Binding}"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                       xmlns:local="clr-namespace:modern_label"
@@ -120,59 +122,66 @@
         <TabControl x:Name="main_tab">
             <TabItem Header="Main">
 
-                <Grid Margin="-2,2,2,-2">
-                    <TextBlock x:Name="welcome_textbox" FontSize="40" Text="{Binding Mode=TwoWay,Path=Welcome_text}" ></TextBlock>
-                    <Controls:Tile x:Name="time" Title="Today"
+                <Grid>
+                    <TextBlock x:Name="welcome_textbox" FontSize="40" Text="{Binding Welcome_text}" ></TextBlock>
+                    <WrapPanel Grid.Row="1"
+                       Grid.Column="1"
+                       Width="940"
+                       Height="382"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top">
+
+                    </WrapPanel>
+                    <WrapPanel Width="auto"
+                       Height="auto"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top" Margin="-5,141,-151,0">
+
+                       
+                        <Controls:Tile x:Name="time" Title="Today"
                     TiltFactor="2" 
                     Width="Auto" Height="Auto" 
                        
-                     Margin="153,148,388,280" Loaded="Tile_Loaded" FontSize="45">
+                      Loaded="Tile_Loaded" FontSize="45">
 
-                    </Controls:Tile>
+                        </Controls:Tile>
 
-                    <Controls:Tile x:Name="user" 
+                        <Controls:Tile x:Name="user" 
                     TiltFactor="2" 
                     Width="Auto" Height="Auto" 
                      
-                     Margin="152,254,388,172" Loaded="Tile_Loaded" FontSize="45">
-                        <Controls:SplitButton x:Name="user_drop" Background="Teal"
+                     Loaded="Tile_Loaded" FontSize="45">
+                            <Controls:SplitButton x:Name="user_drop" Background="Teal"
     Icon="{DynamicResource appbar_user}"
     HorizontalContentAlignment="Left"
     HorizontalAlignment="Center"
     VerticalContentAlignment="Center"
     Width="213"
     SelectedIndex="-1"
-    ItemsSource="{Binding Mode=TwoWay,Path=Users,UpdateSourceTrigger=PropertyChanged}"
+    ItemsSource="{Binding Mode=TwoWay,Path=Users}"
     SelectedValue="{Binding Mode=TwoWay,Path=Users_SelectedValue}"
     VerticalAlignment="Center"/>
 
 
 
-                    </Controls:Tile>
+                        </Controls:Tile>
+                        <Controls:Tile x:Name="history_btn" Title="History" IsEnabled="{Binding Path=Enable_history_btn ,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TiltFactor="2" Grid.Column="0" Width="Auto" Height="Auto">
+                            <Rectangle Width="50" Height="50">
+                                <Rectangle.Fill>
+                                    <VisualBrush Visual="{StaticResource appbar_clock}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
 
+                            
+                        </Controls:Tile>
+
+                    </WrapPanel>
                 </Grid>
+
             </TabItem>
             <TabItem Header="Windows">
-                <Controls:Tile Height="110" Background="#9c6b50" Width="180" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,105,33,0">
-                    <Controls:Tile.Style>
-                        <Style TargetType="Controls:Tile">
-                            <Setter Property="Content">
-                                <Setter.Value>
-                                    <TextBlock Text="Setup Your Savings Account" TextWrapping="Wrap" Width="121" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Content">
-                                        <Setter.Value>
-                                            <TextBlock Text="Click here to Setup Your Savings Account" TextWrapping="Wrap" Width="121" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Controls:Tile.Style>
-                </Controls:Tile>
+
+
 
 
             </TabItem>
@@ -185,7 +194,7 @@
             </StatusBarItem>
             <StatusBarItem>
                 <Controls:SplitButton x:Name="db_select" SelectedIndex="0"
-    ItemsSource="{Binding DB_select}" SelectionChanged="db_select_SelectionChanged" />
+    ItemsSource="{Binding DB_select}"  SelectedItem="{Binding Path=Db_select_item,Mode=TwoWay}"/>
             </StatusBarItem>
             <Separator Style="{StaticResource MetroStatusBarSeparator}"></Separator>
             <StatusBarItem>

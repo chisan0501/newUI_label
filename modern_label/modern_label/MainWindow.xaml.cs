@@ -40,18 +40,21 @@ namespace modern_label
             mysql_status.DataContext = labelViewModel;
             db_select.DataContext = labelViewModel;
             welcome_textbox.DataContext = labelViewModel;
+            history_btn.DataContext = labelViewModel;
+            db_select.DataContext = labelViewModel;
+            user_drop.DataContext = labelViewModel;
         }
 
         private void Tile_Click(object sender, RoutedEventArgs e)
         {
-            
+
         }
 
-    
+
 
         private void Tile_Loaded(object sender, RoutedEventArgs e)
         {
-            
+
             time.Content = DateTime.Now.Date;
         }
 
@@ -118,7 +121,7 @@ namespace modern_label
                     imaging_search_sku.Text = img_search.img_sku;
                 }
             }
-           catch
+            catch
             {
 
             }
@@ -129,18 +132,18 @@ namespace modern_label
         private async void search_edit_Click(object sender, RoutedEventArgs e)
         {
 
-            
+
             string connStr = "Server=MYSQL5013.Smarterasp.net;Database=db_a094d4_icdb;Uid=a094d4_icdb;Pwd=icdb123!;Pooling=true";
 
             MySqlConnection conn = new MySqlConnection(connStr);
             MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "UPDATE rediscovery SET cpu = '" + search_cpu.Text + "',hdd='" + search_hdd.Text + "',ram='" + search_ram.Text + "',brand= '" + search_manu.Text + "',model='" + search_model.Text + "',serial = '" + search_serial.Text + "',optical_drive = '" + search_optical_drive.Text + "',pallet = '"+search_sku.Text+"' WHERE ictag = '" + result_title.Text + "'";
+            command.CommandText = "UPDATE rediscovery SET cpu = '" + search_cpu.Text + "',hdd='" + search_hdd.Text + "',ram='" + search_ram.Text + "',brand= '" + search_manu.Text + "',model='" + search_model.Text + "',serial = '" + search_serial.Text + "',optical_drive = '" + search_optical_drive.Text + "',pallet = '" + search_sku.Text + "' WHERE ictag = '" + result_title.Text + "'";
             conn.Open();
             command.ExecuteNonQuery();
             conn.Close();
-            
+
             await this.ShowMessageAsync("Message", "Rediscovery data Updated");
-          
+
         }
 
         private void setting_btn_Click(object sender, RoutedEventArgs e)
@@ -162,7 +165,7 @@ namespace modern_label
 
             MySqlConnection conn = new MySqlConnection(connStr);
             MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "UPDATE production_log SET wcoa = '" + imaging_search_wcoa.Text + "',ocoa='" + imaging_search_ocoa.Text + "',RAM='" + imaging_search_ram.Text + "',HDD= '" + imaging_search_hdd.Text + "',channel='" + imaging_search_sku.Text + "',video_card = '" +  imaging_search_video.Text + "' WHERE ictags = '" + result_title.Text + "'";
+            command.CommandText = "UPDATE production_log SET wcoa = '" + imaging_search_wcoa.Text + "',ocoa='" + imaging_search_ocoa.Text + "',RAM='" + imaging_search_ram.Text + "',HDD= '" + imaging_search_hdd.Text + "',channel='" + imaging_search_sku.Text + "',video_card = '" + imaging_search_video.Text + "' WHERE ictags = '" + result_title.Text + "'";
             conn.Open();
             command.ExecuteNonQuery();
             conn.Close();
@@ -193,18 +196,15 @@ namespace modern_label
         private void db_select_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //drop down for switching server
-            user_drop.DataContext = null;
-            if (db_select.SelectedItem.ToString() == "MYSQL") {
-              var user_list = mysql_data.users();
-                labelViewModel.LabelModel.users = user_list.users;
-                
-            }
-            else if (db_select.SelectedItem.ToString() == "SQLite") {
-                var user_list = sqlite_data.users();
-                labelViewModel.LabelModel.users = user_list.users;
-            }
+        ///    user_drop.DataContext = null;
 
-            user_drop.DataContext = labelViewModel;
+
+            //   labelViewModel.LabelModel.users = user_list.users;
         }
+
+         
     }
-}
+
+
+    }
+
