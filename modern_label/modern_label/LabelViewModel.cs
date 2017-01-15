@@ -1,39 +1,111 @@
-﻿using MahApps.Metro.Controls.Dialogs;
+﻿using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace modern_label
 {
     class LabelViewModel : INotifyPropertyChanged
     {
+        private readonly IDialogCoordinator _dialogCoordinator;
+        public async void customAction() {
+            string sku = "Empty";
+            switch (selected_channel)
+            {
+                case "Online Order":
+
+                   
+                    await _dialogCoordinator.ShowInputAsync(this, "Online Order", "Please Enter Order #").ContinueWith(t => sku = (t.Result));
+                   
+                    
+
+                    break;
+                default:
+                    sku = Selected_sku;
+                    break;
+            }
+            RefrubHistoryObj = mysql_data.redisco_data(submit_asset);
+            RefrubHistoryObj.refurbisher = this.Users_SelectedValue;
+            Label_make = RefrubHistoryObj.made;
+            Label_model = RefrubHistoryObj.model;
+            Label_cpu = RefrubHistoryObj.cpu;
+            Label_ram = RefrubHistoryObj.ram;
+            Label_hdd = RefrubHistoryObj.hdd;
+            Label_serial = RefrubHistoryObj.serial;
+            RefrubHistoryObj.sku = sku;
+            RefrubHistoryObj.channel = Selected_channel;
+            RefrubHistoryObj.selected_printer = Selected_printer;
+            var dymo = new Dymo_provider();
+            Preview = dymo.generate_label(RefrubHistoryObj);
+            Printer_enable = true;
+        }
+        private ICommand showInputDialogCommand;
+
+        public ICommand ShowInputDialogCommand
+        {
+            get
+            {
+                return showInputDialogCommand ?? (showInputDialogCommand = new CommandHandler(() => customAction(), _canExecute));
+                
+            }
+        }
         public event PropertyChangedEventHandler PropertyChanged = null;
         protected virtual void RaisePropertyChanged(string propName)
         {
+
             if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propName));
 
                 switch (propName) {
+                    case "History_fly":
+
+                        MyList = new ObservableCollection<RefrubHistoryObj>();
+                        MyList = mysql_data.db_history();
+
+                        break;
+                    case "Selected_sku":
+
+                        break;
+
                     case "Asset_tag":
                         
                         var discovery_result = new discovery_result(this.asset_tag);
                         break;
                     case "Users_SelectedValue":
                         Welcome_text = this.Users_SelectedValue;
-                     
+                        User_status = this.Users_SelectedValue;
+                        break;
+                    case "Computer_type_selected":
+                        Computer_type_status = "Computer Type : " + Computer_type_selected;
+                        break;
+                    case "Submit_asset":
+                        
+                        break;
+                    case "Selected_channel":
+                       
+                       Sku_list = mysql_data.sku_list(selected_channel);
+
+                         break;
+                    case "Label_make":
                         break;
                     case "Db_select_item":
+                       
+                  
                     switch (Db_select_item)
                         {
                             case ("MYSQL"):
-                                this.enable_history_btn = true;
-                               
+                                Enable_history_btn = true;
+                                
                                 var user_list = mysql_data.users();
                                 Users.Clear();
                                 Users = user_list.users;
@@ -43,8 +115,8 @@ namespace modern_label
 
                             case ("SQLite"):
 
-                                this.enable_history_btn = false;
-                                var sql_lite_user_list = sqlite_data.users();
+                                Enable_history_btn = false;
+                                var sql_lite_user_list = mysql_data.users();
                                 Users.Clear();
                                 Users = sql_lite_user_list.users;
                                 break;
@@ -56,25 +128,345 @@ namespace modern_label
                 
             }
         }
+        //command class for binding event 
+        public class CommandHandler : ICommand
+        {
+            private Action _action;
+            private bool _canExecute;
+            public CommandHandler(Action action, bool canExecute)
+            {
+                _action = action;
+                _canExecute = canExecute;
+            }
+
+            public bool CanExecute(object parameter)
+            {
+                return _canExecute;
+            }
+
+            public event EventHandler CanExecuteChanged;
+
+            public void Execute(object parameter)
+            {
+                _action();
+            }
+        }
+
+        
+        public  BitmapImage Preview
+        {
+            get
+            {
+                return LabelModel.Preview;
+            }
+            set
+            {
+                LabelModel.Preview = value;
+                RaisePropertyChanged("Preview");
+            }
+        }
+        //enable history button flyout
+        public void MyAction()
+        {
+          
+            History_fly = true;
+        }
+        public async void GenAction()
+        {
+            switch (Selected_channel)
+            {
+                case "Mar (Desktop)":
+                case "Mar (Laptop)":
+                case "OEM (Desktop)":
+                case "OEM (Laptop)":
+                    string sku_gen = "";
+                    MessageDialogResult result = await ShowMessage("SKU Assigned For : " + Submit_asset, sku_gen, MessageDialogStyle.Affirmative).ConfigureAwait(false);
+                    break;
+                case "My Channel is not Listed":
+                  
+                    break;
+                
+            }
+
+           
+        }
+
+        private bool printer_enable;
+        public bool Printer_enable
+        {
+            get
+            {
+                return printer_enable;
+            }
+            set
+            {
+                printer_enable = value;
+                RaisePropertyChanged("Printer_enable");
+            }
+        }
+
+        private string label_serial;
+        public string Label_serial
+        {
+
+            get { return label_serial; }
+            set
+            {
+                label_serial = value;
+                RaisePropertyChanged("Label_serial");
+            }
+
+        }
+
+        private string label_hdd;
+        public string Label_hdd
+        {
+            get { return label_hdd; }
+            set
+            {
+                label_hdd = value;
+                RaisePropertyChanged("Label_hdd");
+            }
+        }
+
+        private string label_ram;
+        public string Label_ram
+        {
+
+            get { return label_ram; }
+            set
+            {
+                label_ram = value;
+                RaisePropertyChanged("Label_ram");
+            }
+
+        }
+
+
+        private string label_cpu;
+        public string Label_cpu
+        {
+
+            get { return label_cpu; }
+            set
+            {
+                label_cpu = value;
+                RaisePropertyChanged("Label_cpu");
+            }
+
+
+        }
+
+
+        private string label_model;
+        public string Label_model
+        {
+
+
+            get { return label_model; }
+            set
+            {
+                label_model = value;
+                RaisePropertyChanged("Label_model");
+
+            }
+        }
+
+        private string label_make;
+        public string Label_make
+        {
+            get { return label_make; }
+            set {
+                label_make = value;
+                RaisePropertyChanged("Label_make");
+
+            }
+
+
+        }
+
+
+        public List<string> Printer_list
+        {
+            get { return LabelModel.printer_list; }
+            set { LabelModel.printer_list = value; }
+
+
+        }
+
+        private string selected_printer;
+        public string Selected_printer
+        {
+            get { return selected_printer; }
+            set { selected_printer = value;
+                RaisePropertyChanged("Selected_printer");
+
+            }
+
+
+
+        }
+
+
+        public List<string> Grade_list
+        {
+            get { return LabelModel.grade_list; }
+            set { LabelModel.grade_list = value; }
+        }
+
+        private string selected_sku;
+        public string Selected_sku
+        {
+
+            get { return selected_sku; }
+
+            set { selected_sku = value;
+                RaisePropertyChanged("Selected_sku");
+
+            }
+
+        }
+
+
+        
+
+
+
+        public async Task<MessageDialogResult> ShowMessage(string title,string message, MessageDialogStyle dialogStyle)
+        {
+            var metroWindow = (Application.Current.MainWindow as MetroWindow);
+            metroWindow.MetroDialogOptions.ColorScheme = MetroDialogColorScheme.Accented;
+
+            return await metroWindow.ShowMessageAsync(title, message, dialogStyle, metroWindow.MetroDialogOptions);
+        }
+        
+        //sku flyout command
+        private ICommand _genCommand;
+        public ICommand GenCommand
+        {
+            get
+            {
+                return _genCommand ?? (_genCommand = new CommandHandler(() => GenAction(), _canExecute));
+
+            }
+
+        }
+
+        //histroy click command
+        private ICommand _clickCommand;
+        public ICommand ClickCommand
+        {
+            get
+            {
+                return _clickCommand ?? (_clickCommand = new CommandHandler(() => MyAction(), _canExecute));
+            }
+        }
+
+     
+
+        private bool _canExecute;
         public Idbprovider mysql_data = new Mysql_DataProvider();
         public Idbprovider sqlite_data = new SQlite_DataProvider();
+        public RefrubHistoryObj RefrubHistoryObj { get; set; }
         public LabelModel LabelModel { get; set; }
-        public LabelViewModel()
+        private ObservableCollection<RefrubHistoryObj> myList;
+        public ObservableCollection<RefrubHistoryObj> MyList {
+
+            get { return myList; }
+            set { myList = value;
+                RaisePropertyChanged("MyList");
+            }
+
+        }
+
+
+
+        private string submit_precoa;
+        public string Submit_precoa
         {
+
+            get { return submit_precoa; }
+            set { submit_precoa = value;
+                RaisePropertyChanged("Submit_precoa");
+            }
+
+        }
+
+        private List<string> sku_list;
+        public List<string> Sku_list
+        {
+
+            get { return sku_list; }
+
+            set
+            {
+
+                sku_list = value;
+                RaisePropertyChanged("Sku_list");
+            }
+
+        }
+
+        private string selected_channel;
+        public string Selected_channel
+        {
+
+            get { return selected_channel; }
+            set { selected_channel = value;
+                RaisePropertyChanged("Selected_channel");
+            }
+
+        }
+
+
+        public List<string> channel_list
+        {
+            get { return mysql_data.channel_list(); }
+            set {}
+
+        }
+     
+
+        private int submit_asset;
+        public int Submit_asset
+        {
+
+            get { return submit_asset; }
+            set {
+
+                if(value!= submit_asset)
+                submit_asset = value;
+                RaisePropertyChanged("Submit_asset");
+            }
+
+        }
+
+        
+        public LabelViewModel(IDialogCoordinator dialogCoordinator)
+        {
+            _dialogCoordinator = dialogCoordinator;
             //user dropdown data
             //saving user data to a list
             try
             {
+
+                RefrubHistoryObj = new RefrubHistoryObj();
                 LabelModel = new LabelModel();
+                _canExecute = true;
                 //user name list
                 LabelModel.users = new List<string>();
                 LabelModel.db_select = new List<string>();
+                
                 LabelModel.db_select.Add("MYSQL");
                 LabelModel.db_select.Add("SQLite");
                 LabelModel.is_mysql_open = mysql_data.ping();
                 LabelModel.is_sqlite_open = sqlite_data.ping();
+                
+                submit_precoa = "00999-999-000-999";
+
+
                 //ping sqlite
-               
+
                 LabelModel.sqlite_status = "SQLite : Online";
                
 
@@ -100,6 +492,44 @@ namespace modern_label
                 
             }
             
+        }
+
+
+        private bool history_fly;
+        public bool History_fly
+        {
+            get { return history_fly; } 
+            set
+            {
+                if (value != history_fly)
+                {
+                    history_fly = value;
+
+                    RaisePropertyChanged("History_fly");
+                }
+               
+
+            }
+           
+        }
+
+
+        private string user_status;
+        public string User_status
+        {
+
+
+            get { return "User : " +user_status; }
+            set
+            {
+                if(value != user_status)
+                {
+                    user_status = value;
+                    RaisePropertyChanged("User_status");
+                }
+
+
+            }
         }
 
         private string db_select_item;
@@ -150,6 +580,9 @@ namespace modern_label
             }
         }
 
+
+      
+
         private string asset_tag;
         public string Asset_tag
         {
@@ -160,10 +593,47 @@ namespace modern_label
 
         }
 
+        private string computer_type_status;
+        public string Computer_type_status
+        {
+            get { return this.computer_type_status; }
+            set
+            {
+                this.computer_type_status = value;
+                RaisePropertyChanged("Computer_type_status");
+            }
+
+        }
+
+        public List<string>Computer_type
+        {
+            get { return LabelModel.computer_type; }
+            set { LabelModel.computer_type = value; }
+
+        }
+
         public List<string>DB_select
         {
             get { return LabelModel.db_select; }
             set { LabelModel.db_select = value;
+
+            }
+
+
+        }
+
+
+        private string computer_type_selected;
+        public string Computer_type_selected
+        {
+            get { return this.computer_type_selected; }
+            set
+            {
+
+               
+                    computer_type_selected = value;
+                    RaisePropertyChanged("Computer_type_selected");
+                
 
             }
 

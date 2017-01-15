@@ -25,24 +25,24 @@ namespace modern_label
     public partial class MainWindow : MetroWindow
     {
         private LabelViewModel labelViewModel;
+        private RefrubHistoryObj RefrubHistoryObj;
         public Idbprovider mysql_data = new Mysql_DataProvider();
         public Idbprovider sqlite_data = new SQlite_DataProvider();
         public MainWindow()
         {
+           
+
             Tuple<AppTheme, Accent> appStyle = ThemeManager.DetectAppStyle(Application.Current);
             ThemeManager.ChangeAppStyle(Application.Current,
                                     ThemeManager.GetAccent("Teal"),
                                     ThemeManager.GetAppTheme("BaseDark"));
             InitializeComponent();
-            labelViewModel = new LabelViewModel();
-            search_box.DataContext = labelViewModel;
-            sqlite_status.DataContext = labelViewModel;
-            mysql_status.DataContext = labelViewModel;
-            db_select.DataContext = labelViewModel;
-            welcome_textbox.DataContext = labelViewModel;
-            history_btn.DataContext = labelViewModel;
-            db_select.DataContext = labelViewModel;
-            user_drop.DataContext = labelViewModel;
+            labelViewModel = new LabelViewModel(DialogCoordinator.Instance);
+            RefrubHistoryObj = new RefrubHistoryObj();
+            DataContext = labelViewModel;
+           
+
+
         }
 
         private void Tile_Click(object sender, RoutedEventArgs e)
@@ -57,7 +57,7 @@ namespace modern_label
 
             time.Content = DateTime.Now.Date;
         }
-
+         
 
         //tab button control
         private void MetroWindow_KeyDown(object sender, KeyEventArgs e)
@@ -132,7 +132,7 @@ namespace modern_label
         private async void search_edit_Click(object sender, RoutedEventArgs e)
         {
 
-
+           
             string connStr = "Server=MYSQL5013.Smarterasp.net;Database=db_a094d4_icdb;Uid=a094d4_icdb;Pwd=icdb123!;Pooling=true";
 
             MySqlConnection conn = new MySqlConnection(connStr);
@@ -195,14 +195,23 @@ namespace modern_label
 
         private void db_select_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //drop down for switching server
-        ///    user_drop.DataContext = null;
-
-
-            //   labelViewModel.LabelModel.users = user_list.users;
+          
         }
 
-         
+        private void Pre_COA_GotFocus(object sender, RoutedEventArgs e)
+        {
+            Pre_COA.SelectAll();
+        }
+
+        private void Asset_tag_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                var request = new TraversalRequest(FocusNavigationDirection.Next);
+                request.Wrapped = true;
+                Asset_tag.MoveFocus(request);
+            }
+            }
     }
 
 

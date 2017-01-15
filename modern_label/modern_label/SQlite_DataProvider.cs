@@ -1,6 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
@@ -12,6 +13,45 @@ namespace modern_label
 {
     class SQlite_DataProvider : Idbprovider
     {
+
+        public ObservableCollection<RefrubHistoryObj> db_history()
+        {
+
+            var result = new ObservableCollection<RefrubHistoryObj>();
+            return result;
+
+        }
+
+
+        public List<string> sku_list(string channel)
+        {
+
+            List<string> result = new List<string>();
+
+
+
+            return result;
+
+
+        }
+
+        public List<string> channel_list()
+        {
+
+            List<string> result = new List<string>();
+
+            return result;
+        }
+
+
+        public RefrubHistoryObj redisco_data(int asset)
+        {
+
+            var result = new RefrubHistoryObj();
+
+            return result;
+        }
+
         public bool ping()
         {
             bool is_online = false;

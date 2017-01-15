@@ -30,7 +30,7 @@ namespace modern_label
 
                     httpClient.DefaultRequestHeaders.TryAddWithoutValidation("authorization", "Basic ZmU3YzE2MGMyZjE0NDc1ZDljNWQ0ZWI2ZmMzYmRhOWU6YzRiM2RhMjlkZWZlNDgyOWJlZmRlYTExNmU1N2Q5ZTY=");
 
-                    using (var response = await httpClient.GetAsync("orders?storeID=14810&pageSize=500&page="+12))
+                    using (var response = await httpClient.GetAsync("orders?storeID=14810&pageSize=500&page=" + 13))
                     {
 
                         string responseData = await response.Content.ReadAsStringAsync();
@@ -45,18 +45,21 @@ namespace modern_label
 
                             MySqlConnection conn = new MySqlConnection(connStr);
                             MySqlCommand command = conn.CreateCommand();
-                            command.CommandText = "insert into ebay (order_id,ship_date,order_date,order_total,ship_name,ship_address,ship_city,ship_state,ship_zip,carrier,order_status,payment_method) values ('" + result.orders[i].orderId + "','" + result.orders[i].shipDate + "','" + result.orders[i].orderDate + "','" + result.orders[i].orderTotal + "','" + result.orders[i].shipTo.name + "','" + result.orders[i].shipTo.street1 + "','" + result.orders[i].shipTo.city + "','" + result.orders[i].shipTo.state + "','" + result.orders[i].shipTo.postalCode + "','" + result.orders[i].carrierCode + "','" + result.orders[i].orderStatus + "','" + result.orders[i].paymentMethod + "')";
+                            command.CommandText = "insert into ebay (order_id,ship_date,order_date,order_total,ship_name,ship_address,ship_city,ship_state,ship_zip,carrier,order_status,payment_method,tax) values ('" + result.orders[i].orderId + "','" + result.orders[i].shipDate + "','" + result.orders[i].orderDate + "','" + result.orders[i].orderTotal + "','" + result.orders[i].shipTo.name + "','" + result.orders[i].shipTo.street1 + "','" + result.orders[i].shipTo.city + "','" + result.orders[i].shipTo.state + "','" + result.orders[i].shipTo.postalCode + "','" + result.orders[i].carrierCode + "','" + result.orders[i].orderStatus + "','" + result.orders[i].paymentMethod + "','" + result.orders[i].taxAmount + "')";
                             conn.Open();
                             command.ExecuteNonQuery();
                             conn.Close();
 
                         }
-                        
-                    
+
+
+                    }
                 }
+
             }
+               
         
         }
 
     }
-}
+
