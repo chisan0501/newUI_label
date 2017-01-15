@@ -16,6 +16,7 @@ namespace modern_label
 {
     class LabelViewModel : INotifyPropertyChanged
     {
+        public DYMO.Label.Framework.ILabel current_label;
         private readonly IDialogCoordinator _dialogCoordinator;
         public async void customAction() {
             string sku = "Empty";
@@ -45,9 +46,26 @@ namespace modern_label
             RefrubHistoryObj.channel = Selected_channel;
             RefrubHistoryObj.selected_printer = Selected_printer;
             var dymo = new Dymo_provider();
-            Preview = dymo.generate_label(RefrubHistoryObj);
+            current_label= dymo.generate_label(RefrubHistoryObj);
+            Preview = dymo.generate_preview(current_label);
             Printer_enable = true;
         }
+        public void printAction()
+        {
+            current_label.Print(Selected_printer);
+        }
+
+        private ICommand print;
+        public ICommand Print
+        {
+            get
+            {
+                return print ?? (print = new CommandHandler(() => printAction(), _canExecute));
+            }
+
+
+        }
+
         private ICommand showInputDialogCommand;
 
         public ICommand ShowInputDialogCommand

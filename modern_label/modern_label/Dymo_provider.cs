@@ -18,7 +18,31 @@ namespace modern_label
 
         }
 
-        public BitmapImage generate_label (RefrubHistoryObj spec)
+
+        public BitmapImage generate_preview (ILabel label)
+        {
+            string path = Directory.GetCurrentDirectory();
+            ILabelRenderParams renderParams = new LabelRenderParams();
+
+            renderParams.LabelColor = DYMO.Label.Framework.Colors.White;
+            renderParams.ShadowColor = DYMO.Label.Framework.Colors.DarkGray;
+            renderParams.ShadowDepth = 3;
+            renderParams.PngUseDisplayResolution = true;
+            byte[] pngData = label.RenderAsPng(null, renderParams);
+            System.Drawing.Image.FromStream(new MemoryStream(pngData)).Save(path + @"\\preview.png");
+            System.Windows.Media.Imaging.BitmapImage bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.StreamSource = new MemoryStream(pngData);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            // bitmap.UriSource = new Uri(path + @"\\preview.png");
+            bitmap.EndInit();
+            bitmap.Freeze();
+            return bitmap;
+        }
+
+        //read and create label by usng source.label located in Debug folder
+        //returns the preview image
+        public ILabel generate_label (RefrubHistoryObj spec)
         {
             string path = Directory.GetCurrentDirectory();
             var label = DYMO.Label.Framework.Label.Open(path + @"\\source.label");
@@ -35,22 +59,8 @@ namespace modern_label
             label.SetObjectText("serial", spec.serial);
 
 
-            ILabelRenderParams renderParams = new LabelRenderParams();
-            
-            renderParams.LabelColor = DYMO.Label.Framework.Colors.White;
-            renderParams.ShadowColor = DYMO.Label.Framework.Colors.DarkGray;
-            renderParams.ShadowDepth = 3;
-            renderParams.PngUseDisplayResolution = true;
-            byte[] pngData = label.RenderAsPng(null, renderParams);
-            System.Drawing.Image.FromStream(new MemoryStream(pngData)).Save(path + @"\\preview.png");
-            System.Windows.Media.Imaging.BitmapImage bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.StreamSource = new MemoryStream(pngData);
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-           // bitmap.UriSource = new Uri(path + @"\\preview.png");
-            bitmap.EndInit();
-            bitmap.Freeze();
-            return bitmap;
+            //create preview for the label 
+            return label;
         }
 
     }
