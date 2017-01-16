@@ -16,6 +16,7 @@ namespace modern_label
 {
     class LabelViewModel : INotifyPropertyChanged
     {
+      
         public DYMO.Label.Framework.ILabel current_label;
         private readonly IDialogCoordinator _dialogCoordinator;
         public async void customAction() {
@@ -30,9 +31,14 @@ namespace modern_label
                     
 
                     break;
+                case "My Channel is not Listed":
+                    await _dialogCoordinator.ShowInputAsync(this, "Custom Channel", "Please Enter Channel Name").ContinueWith(t => sku = (t.Result));
+                    Selected_channel = sku;
+                    break;
                 default:
                     sku = Selected_sku;
                     break;
+               
             }
             RefrubHistoryObj = mysql_data.redisco_data(submit_asset);
             RefrubHistoryObj.refurbisher = this.Users_SelectedValue;
@@ -85,12 +91,14 @@ namespace modern_label
                 PropertyChanged(this, new PropertyChangedEventArgs(propName));
 
                 switch (propName) {
+                    //gererate list for flyout on histroy button
                     case "History_fly":
 
                         MyList = new ObservableCollection<RefrubHistoryObj>();
                         MyList = mysql_data.db_history();
 
                         break;
+                      
                     case "Selected_sku":
 
                         break;
@@ -99,6 +107,7 @@ namespace modern_label
                         
                         var discovery_result = new discovery_result(this.asset_tag);
                         break;
+                     //chnage text on user selected
                     case "Users_SelectedValue":
                         Welcome_text = this.Users_SelectedValue;
                         User_status = this.Users_SelectedValue;
@@ -114,7 +123,11 @@ namespace modern_label
                        Sku_list = mysql_data.sku_list(selected_channel);
 
                          break;
-                    case "Label_make":
+                    case "Label_model":
+                        if (current_label != null) {
+                            current_label.SetObjectText("manu", Label_model); 
+                        }
+                    
                         break;
                     case "Db_select_item":
                        

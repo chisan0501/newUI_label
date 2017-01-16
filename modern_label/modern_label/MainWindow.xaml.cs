@@ -212,6 +212,11 @@ namespace modern_label
                 Asset_tag.MoveFocus(request);
             }
             }
+
+        private void db_select_Loaded(object sender, RoutedEventArgs e)
+        {
+            db_select.SelectedIndex = 0;
+        }
     }
 
 

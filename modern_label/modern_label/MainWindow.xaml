@@ -130,18 +130,15 @@
     <Grid>
 
         <TabControl x:Name="main_tab" >
-            <TabItem Header="Main">
+            <TabItem Header="Home">
 
                 <Grid>
-                    <TextBlock x:Name="welcome_textbox" FontSize="40" Text="{Binding Welcome_text}" ></TextBlock>
-                    <WrapPanel Grid.Row="1"
-                       Grid.Column="1"
-                       Width="940"
+                    <TextBlock x:Name="welcome_textbox" FontSize="40" Margin="0,18" Text="{Binding Welcome_text}" ></TextBlock>
+                    <WrapPanel
+                       Width="779"
                        Height="382"
                        HorizontalAlignment="Left"
-                       VerticalAlignment="Top">
-
-                    </WrapPanel>
+                       VerticalAlignment="Top"/>
                     <WrapPanel Width="auto"
                        Height="auto"
                        HorizontalAlignment="Center"
@@ -199,13 +196,14 @@
 
             </TabItem>
             <TabItem x:Name="windows_tab" Header="Windows">
+
                 <Grid>
                     <Grid.ColumnDefinitions>
 
                         <ColumnDefinition Width="187" />
 
                         <ColumnDefinition Width="260*" />
-                       
+
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -228,22 +226,34 @@
                         <Controls:ToggleSwitch IsChecked="False" Header="Migrate Data" Margin="0,35" />
                         <ComboBox x:Name="printer_dropdown" SelectedItem="{Binding Selected_printer, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select Printer" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Printer_list}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" />
 
-                        <Button Width="100" Command="{Binding ShowInputDialogCommand}" Content="Submit" Margin="0,25" />
-                        <Button Command="{Binding Print}" Width="60"
-                        Height="60"
-                        IsEnabled="{Binding Printer_enable}"
-                        Style="{DynamicResource MetroCircleButtonStyle}">
-                            <Rectangle Width="35"
+                        <Grid Margin="0,15">
+                            <Button ToolTip="Search" Command="{Binding ShowInputDialogCommand}" Width="60"
+                        Height="60" Style="{DynamicResource MetroCircleButtonStyle}" Margin="29,0,97.667,0">
+                                <Rectangle Width="35"
                                Height="35"
                                Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
-                                <Rectangle.OpacityMask>
-                                    <VisualBrush Stretch="Fill"
+                                    <Rectangle.OpacityMask>
+                                        <VisualBrush Stretch="Fill"
+                                         Visual="{DynamicResource appbar_magnify}" />
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </Button>
+                            <Button Command="{Binding Print}" Width="60"
+                        Height="60"
+                        IsEnabled="{Binding Printer_enable}"
+                        Style="{DynamicResource MetroCircleButtonStyle}" Margin="94,0,32.667,0">
+                                <Rectangle Width="35"
+                               Height="35"
+                               Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                                    <Rectangle.OpacityMask>
+                                        <VisualBrush Stretch="Fill"
                                          Visual="{DynamicResource appbar_printer}" />
-                                </Rectangle.OpacityMask>
-                            </Rectangle>
-                        </Button>
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </Button>
+                        </Grid>
                     </StackPanel>
-                  
+
                     <StackPanel Grid.Column="1" Grid.Row="1" >
                         <TextBox x:Name="Make" Controls:TextBoxHelper.Watermark="Make" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
                          Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Label_make,Mode=TwoWay}"
@@ -255,17 +265,17 @@
                          Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Label_cpu,Mode=TwoWay}"
                          ></TextBox>
                         <TextBox x:Name="RAM" Controls:TextBoxHelper.Watermark="RAM" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
-                         Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Label_ram,Mode=TwoWay}"
+                         Controls:TextBoxHelper.IsWaitingForData="True" ToolTip="Enter the Capacity in MB and please do not include the unit" Text="{Binding Label_ram,Mode=TwoWay}"
                          ></TextBox>
                         <TextBox x:Name="HDD" Controls:TextBoxHelper.Watermark="HDD" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
-                         Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Label_hdd,Mode=TwoWay}"
+                         Controls:TextBoxHelper.IsWaitingForData="True" ToolTip="Enter the Capacity in GB and please do not include the unit" Text="{Binding Label_hdd,Mode=TwoWay}"
                          ></TextBox>
                         <TextBox x:Name="Serial" Controls:TextBoxHelper.Watermark="Serial" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
                          Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Label_serial,Mode=TwoWay}"
                          ></TextBox>
                         <Image x:Name="preview_image" Source="{Binding Preview}" Margin="0,10" Height="240"/>
                     </StackPanel>
-                  
+
                 </Grid>
 
 
@@ -282,7 +292,7 @@
             </StatusBarItem>
             <StatusBarItem>
                 <Controls:SplitButton x:Name="db_select" SelectedIndex="0"
-    ItemsSource="{Binding DB_select}"  SelectedItem="{Binding Path=Db_select_item,Mode=TwoWay}"/>
+    ItemsSource="{Binding DB_select}"  SelectedItem="{Binding Path=Db_select_item,Mode=TwoWay}" Loaded="db_select_Loaded"/>
             </StatusBarItem>
             <Separator Style="{StaticResource MetroStatusBarSeparator}"></Separator>
             <StatusBarItem>

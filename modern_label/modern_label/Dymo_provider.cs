@@ -15,12 +15,13 @@ namespace modern_label
        
         public Dymo_provider()
         {
-
+          
         }
 
 
         public BitmapImage generate_preview (ILabel label)
         {
+
             string path = Directory.GetCurrentDirectory();
             ILabelRenderParams renderParams = new LabelRenderParams();
 
