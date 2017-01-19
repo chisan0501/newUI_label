@@ -187,15 +187,18 @@
     HorizontalContentAlignment="Left"
     HorizontalAlignment="Center"
     VerticalContentAlignment="Center"       
-    ItemsSource="{Binding Mode=TwoWay,Path=Computer_type}"
-    SelectedValue="{Binding Path=Computer_type_selected,Mode=TwoWay}"
-    VerticalAlignment="Center"/>
+    ItemsSource="{Binding Computer_type}"
+                                              DisplayMemberPath="name"
+                                              SelectedValuePath="value"
+                                  
+    SelectedValue="{Binding Computer_type_value, Mode=TwoWay}"
+    VerticalAlignment="Center" SelectionChanged="computerType_drop_SelectionChanged"/>
 
                     </WrapPanel>
                 </Grid>
 
             </TabItem>
-            <TabItem x:Name="windows_tab" Header="Windows">
+            <TabItem x:Name="windows_tab" Header="Windows" >
 
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -221,10 +224,11 @@
                          Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Submit_precoa}"
                          ToolTip="Default Pre-COA will be entered if field is left empty" GotFocus="Pre_COA_GotFocus"></TextBox>
                         <ComboBox x:Name="channel_dropdown" SelectedItem="{Binding Selected_channel, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select Channel" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding channel_list}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" />
-                        <ComboBox x:Name="sku_dropdown" SelectedItem="{Binding Selected_sku, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select SKU" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Path=Sku_list,Mode=TwoWay}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" />
-                        <ComboBox x:Name="grade_dropdown" SelectedItem="{Binding Selected_grade, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select Grade" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Grade_list}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" />
-                        <Controls:ToggleSwitch IsChecked="False" Header="Migrate Data" Margin="0,35" />
-                        <ComboBox x:Name="printer_dropdown" SelectedItem="{Binding Selected_printer, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select Printer" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Printer_list}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" />
+                        <ComboBox x:Name="sku_dropdown"  SelectedItem="{Binding Selected_sku, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select SKU" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Path=Sku_list,Mode=TwoWay}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" />
+                        <ComboBox x:Name="grade_dropdown" DisplayMemberPath="name" SelectedValuePath="value" SelectedValue="{Binding grade_Selected_value, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select Grade" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Grade_list}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" Loaded="grade_dropdown_Loaded" />
+                        <Controls:ToggleSwitch IsChecked="False" Header="Migrate Data" Margin="0,15" />
+                        <Controls:ToggleSwitch IsChecked="False" Header="Copy Data to Discovery" Margin="0,0" />
+                        <ComboBox x:Name="printer_dropdown"  SelectedItem="{Binding Selected_printer, Mode=TwoWay,ValidatesOnDataErrors=True}"  Controls:TextBoxHelper.Watermark="Select Printer" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Printer_list}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" />
 
                         <Grid Margin="0,15">
                             <Button ToolTip="Search" Command="{Binding ShowInputDialogCommand}" Width="60"
@@ -319,9 +323,7 @@
             <Separator Style="{StaticResource MetroStatusBarSeparator}"></Separator>
             <StatusBarItem>
 
-                <TextBlock Name="computer_type_status" Text="{Binding Computer_type_status}">
-
-                </TextBlock>
+                
 
             </StatusBarItem>
 

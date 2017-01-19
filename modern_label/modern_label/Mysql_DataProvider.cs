@@ -10,6 +10,7 @@ namespace modern_label
 {
     class Mysql_DataProvider : Idbprovider
     {
+
         public Discovery_result discovery_data(string asset)
         {
             var test = new Discovery_result();
@@ -65,6 +66,32 @@ namespace modern_label
             return is_connect; 
         }
 
+        public Dictionary<String,int> sku_brand()
+         {
+            var result = new Dictionary<string, int>();
+
+            string connStr = "Server=MYSQL5013.Smarterasp.net;Database=db_a094d4_icdb;Uid=a094d4_icdb;Pwd=icdb123!;Pooling=true";
+            String cmdText = "select * from magento_sku_brand";
+            MySqlConnection conn = new MySqlConnection(connStr);
+            MySqlCommand command = conn.CreateCommand();
+
+            conn.Open();
+
+            using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
+            {
+                MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
+                while (reader.Read())
+                {
+                    result.Add(reader["name"].ToString(), int.Parse(reader["index"].ToString()));
+                 
+                }
+                conn.Close();
+
+            }
+
+            return result;
+        }
+
         public RefrubHistoryObj redisco_data (int asset )
         {
 
@@ -83,7 +110,7 @@ namespace modern_label
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
-                 result =   new RefrubHistoryObj() { asset_tag = int.Parse(reader["ictag"].ToString()), time = DateTime.Parse(reader["time"].ToString()), refurbisher = (reader["refurbisher"].ToString()), sku = (reader["pallet"].ToString()), hdd = (reader["hdd"].ToString()), ram = (reader["ram"].ToString()),cpu = (reader["cpu"].ToString()), made =(reader["brand"].ToString()),model = (reader["model"].ToString()),serial = (reader["serial"].ToString()) };
+                 result =   new RefrubHistoryObj() { asset_tag = int.Parse(reader["ictag"].ToString()), time = DateTime.Parse(reader["time"].ToString()), refurbisher = (reader["refurbisher"].ToString()), sku = (reader["pallet"].ToString()), hdd = (reader["hdd"].ToString()), ram = (reader["ram"].ToString()),cpu = (reader["cpu"].ToString()), made =(reader["brand"].ToString()),model = (reader["model"].ToString()),serial = (reader["serial"].ToString()),optical_drive = (reader["optical_drive"].ToString()) };
                 }
                 conn.Close();
 
@@ -135,7 +162,57 @@ namespace modern_label
             return result;
         }
 
+        public LabelModel.magento_ram get_ram (string size )
+        {
+            var result = new LabelModel.magento_ram();
+            string connStr = "Server=MYSQL5013.Smarterasp.net;Database=db_a094d4_icdb;Uid=a094d4_icdb;Pwd=icdb123!;Pooling=true";
+            String cmdText = "select * from magento_html where type = 'ram' and name ='" + size + "'";
+            MySqlConnection conn = new MySqlConnection(connStr);
+            MySqlCommand command = conn.CreateCommand();
 
+            conn.Open();
+
+            using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
+            {
+                MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
+                while (reader.Read())
+                {
+                    result.html = (reader["html"].ToString());
+                    result.drop_down_value = (reader["drop_down_value"].ToString());
+                }
+                conn.Close();
+
+            }
+
+            return result;
+
+
+        }
+       
+       public LabelModel.magento_hdd get_hdd(string size)
+        {
+            var result = new LabelModel.magento_hdd();
+            string connStr = "Server=MYSQL5013.Smarterasp.net;Database=db_a094d4_icdb;Uid=a094d4_icdb;Pwd=icdb123!;Pooling=true";
+            String cmdText = "select * from magento_html where type = 'hdd' and name ='"+size+"'";
+            MySqlConnection conn = new MySqlConnection(connStr);
+            MySqlCommand command = conn.CreateCommand();
+
+            conn.Open();
+
+            using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
+            {
+                MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
+                while (reader.Read())
+                {
+                    result.html = (reader["html"].ToString());
+                    result.drop_down_value = (reader["drop_down_value"].ToString());
+                }
+                conn.Close();
+
+            }
+
+            return result;
+        }
 
         public List<string> sku_list (string channel)
         {

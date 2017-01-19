@@ -12,6 +12,8 @@ namespace modern_label
     {
 
 
+       
+
         public List<string> printer_list
         {
             get {
@@ -28,31 +30,60 @@ namespace modern_label
             }
             set { }
         }
-
-        public List<string> grade_list
+        public class grade
         {
+            public string value { get; set; }
+            
+            public string name { get; set; }
+        }
 
+
+        public class magento_ram
+        {
+            public string name { get; set; }
+            public string drop_down_value { get; set; }
+            public string html { get; set; }
+        }
+
+        public class magento_hdd
+        {
+            public string name { get; set; }
+                public string drop_down_value { get; set; }
+            public string html { get; set; }
+        }
+
+        public List<grade> grade_list
+        {
             get
             {
-                List<string> temp = new List<string>();
-                temp.Add("A");
-                temp.Add("B");
-                temp.Add("C");
-                return temp;
+                List<grade> newlist = new List<grade>();
+               newlist.Add(new grade() { name = "A", value = "" });
+                newlist.Add(new grade() { name = "B", value = "_GradeB" });
+                newlist.Add(new grade() { name = "C", value = "_GradeC" });
+                return newlist;
             }
             set { }
 
         }
+       
         public BitmapImage Preview { get;set;}
         public List<string> users { get; set; }
-        public List<string> computer_type
+
+
+        public class computer_type
+        {
+            public string name { get; set; }
+            public string value { get; set; }
+
+        }
+        public List<computer_type> computer_dropdown
         {
 
             get
             {
-                List<string> temp = new List<string>();
-                temp.Add("Desktop");
-                temp.Add("Laptop");
+                List<computer_type> temp = new List<computer_type>();
+                temp.Add(new computer_type() { name = "Desktop", value = "_DK" });
+                temp.Add(new computer_type() { name = "Laptop", value = "_LP" });
                 return temp;
             }
 
@@ -91,10 +122,49 @@ namespace modern_label
         
         public string channel { get; set; }
         public string selected_printer { get; set; }
-       
+        public string type { get; set; }
+        public string grade { get; set;}
+        public string desc { get; set; }
+        public string short_desc { get; set; }
+        public string create_date { get; set; }
+        public string brand { get; set; } 
+        public string optical_drive { get; set; }   
+        public string pallet { get; set; }  
+        //public string asst_tag { get; set; }
+        public string pre_coa { get; set; }
+        public string software { get; set; }
+        public string accessories { get; set; }
+        public string soft_desc { get; set; }
+        public string ic_cert { get; set; }
+        public string cpu_desc { get; set; }
+        public string hdd_desc { get; set; }
+        public string ram_desc { get; set; }
+        public string brand_dropdown { get; set; }
+        public string cpu_dropdown { get; set; }
+        public string memory_dropdown { get; set; }
+        public string hdd_dropdown { get; set; }
+        public string listing_title { get; set; }
+        public string meta_title { get; set; }
+        public string meta_desc { get; set; }
+        public string wireless { get; set; }
+    
+        //public string grade_string { get; set; }
     }
 
-  
+    public class Lenovo
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Serial { get; set; }
+        public string Type { get; set; }
+        public string ParentID { get; set; }
+        public int Popularity { get; set; }
+
+        public static implicit operator List<object>(Lenovo v)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     public class Discovery_result
     {

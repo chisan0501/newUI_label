@@ -1,10 +1,13 @@
 ﻿using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
+using MvvmValidation;
 using MySql.Data.MySqlClient;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,51 +17,170 @@ using System.Windows.Media.Imaging;
 
 namespace modern_label
 {
-    class LabelViewModel : INotifyPropertyChanged
+    class LabelViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     {
-      
+       
+
         public DYMO.Label.Framework.ILabel current_label;
         private readonly IDialogCoordinator _dialogCoordinator;
+        protected ValidationHelper Validator { get; private set; }
+        private NotifyDataErrorInfoAdapter NotifyDataErrorInfoAdapter { get; set; }
+        private void OnErrorsChanged(object sender, DataErrorsChangedEventArgs e)
+        {
+            // Notify the UI that the property has changed so that the validation error gets displayed (or removed).
+            RaisePropertyChanged(e.PropertyName);
+            return;
+        }
+        public IEnumerable GetErrors(string propertyName)
+        {
+            return NotifyDataErrorInfoAdapter.GetErrors(propertyName);
+        }
+
+        public bool HasErrors
+        {
+            get { return NotifyDataErrorInfoAdapter.HasErrors; }
+        }
+
+        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged
+        {
+            add { NotifyDataErrorInfoAdapter.ErrorsChanged += value; }
+            remove { NotifyDataErrorInfoAdapter.ErrorsChanged -= value; }
+        }
+
+
+        public LabelViewModel(IDialogCoordinator dialogCoordinator)
+        {
+            _dialogCoordinator = dialogCoordinator;
+            //user dropdown data
+            //saving user data to a list
+            try
+            {
+                
+                Validator = new ValidationHelper();
+                NotifyDataErrorInfoAdapter = new NotifyDataErrorInfoAdapter(Validator);
+                Validator.AddRequiredRule(() => Selected_printer, "Printer is required");
+                Validator.AddRequiredRule(() => Users_SelectedValue, "User is required");
+                Validator.AddRequiredRule(() => Computer_type_value, "Computer Type is required");
+                Validator.AddRequiredRule(() => Selected_channel, "Channel is required");
+                Validator.AddRequiredRule(() => Selected_sku, "SKU is required");
+                NotifyDataErrorInfoAdapter.ErrorsChanged += OnErrorsChanged;
+                RefrubHistoryObj = new RefrubHistoryObj();
+                LabelModel = new LabelModel();
+                _canExecute = true;
+                //user name list
+                LabelModel.users = new List<string>();
+                LabelModel.db_select = new List<string>();
+
+                LabelModel.db_select.Add("MYSQL");
+                LabelModel.db_select.Add("SQLite");
+                LabelModel.is_mysql_open = mysql_data.ping();
+                LabelModel.is_sqlite_open = sqlite_data.ping();
+
+                submit_precoa = "00999-999-000-999";
+
+
+                //ping sqlite
+
+                LabelModel.sqlite_status = "SQLite : Online";
+
+
+                //ping mysql
+
+                LabelModel.mysql_status = "MySQl : Online";
+
+
+
+
+                if (LabelModel.is_mysql_open == false)
+                {
+                    LabelModel.mysql_status = "MySQl : Offline";
+                }
+                if (LabelModel.is_sqlite_open == false)
+                {
+                    LabelModel.sqlite_status = "SQLite : Offline";
+
+                }
+            }
+            catch
+            {
+                //update the status bar message to fail
+
+            }
+
+        }
+
         public async void customAction() {
+            MvvmValidation.ValidationResult validationResult = Validator.ValidateAll();
+            string message = "Please Check the following input: \n\r";
+            foreach (var item in validationResult.ErrorList)
+            {
+                message += item.ErrorText + "\n\r";
+
+            }
+            if(validationResult.IsValid == false)
+            {
+                await _dialogCoordinator.ShowMessageAsync(this, "Error", message);
+                return;
+            }
             string sku = "Empty";
+            var listing = new magento_listing();
+            RefrubHistoryObj = mysql_data.redisco_data(submit_asset);
+            RefrubHistoryObj.refurbisher = this.Users_SelectedValue;
+            RefrubHistoryObj.sku = sku + grade_Selected_value;
+            RefrubHistoryObj.channel = Selected_channel;
+            RefrubHistoryObj.selected_printer = Selected_printer;
+            RefrubHistoryObj.type = Computer_type_value;
+            RefrubHistoryObj.pre_coa = Submit_precoa;
+            RefrubHistoryObj.grade = grade_Selected_value;
+
             switch (selected_channel)
             {
-                case "Online Order":
-
-                   
-                    await _dialogCoordinator.ShowInputAsync(this, "Online Order", "Please Enter Order #").ContinueWith(t => sku = (t.Result));
-                   
+                case "Mar (Desktop)":
+                case "Mar (Laptop)":
+                    //format the sku before passing on
                     
-
+                    //create the temp variable to hold the sku construct info 
+                    var temp_brand = magento_sku.compute_difference(RefrubHistoryObj.made, magento_sku.brand_name());
+                    RefrubHistoryObj.brand = temp_brand;
+                     var temp_cpu = magento_sku.comput_title(RefrubHistoryObj);
+                    var temp_ram = magento_sku.ram_format(RefrubHistoryObj, false);
+                    var temp_hdd = magento_sku.hdd_format(false, RefrubHistoryObj);
+                    RefrubHistoryObj.sku = temp_brand + "_" + RefrubHistoryObj.model + "_" + temp_cpu + "_" + temp_ram + "_" + temp_hdd + RefrubHistoryObj.type + RefrubHistoryObj.grade;
+                    var magento_listing = listing.listing_info(RefrubHistoryObj);
+                    RefrubHistoryObj = magento_sku.format_sku(RefrubHistoryObj);
+                    break;
+                case "Online Order":                  
+                    await _dialogCoordinator.ShowInputAsync(this, "Online Order", "Please Enter Order #").ContinueWith(t => sku = (t.Result));
                     break;
                 case "My Channel is not Listed":
                     await _dialogCoordinator.ShowInputAsync(this, "Custom Channel", "Please Enter Channel Name").ContinueWith(t => sku = (t.Result));
-                    Selected_channel = sku;
+                    Selected_channel = sku + grade_Selected_value;
                     break;
                 default:
-                    sku = Selected_sku;
+                    RefrubHistoryObj.sku = Selected_sku + grade_Selected_value;
                     break;
                
             }
-            RefrubHistoryObj = mysql_data.redisco_data(submit_asset);
-            RefrubHistoryObj.refurbisher = this.Users_SelectedValue;
             Label_make = RefrubHistoryObj.made;
             Label_model = RefrubHistoryObj.model;
             Label_cpu = RefrubHistoryObj.cpu;
             Label_ram = RefrubHistoryObj.ram;
             Label_hdd = RefrubHistoryObj.hdd;
             Label_serial = RefrubHistoryObj.serial;
-            RefrubHistoryObj.sku = sku;
-            RefrubHistoryObj.channel = Selected_channel;
-            RefrubHistoryObj.selected_printer = Selected_printer;
+            
             var dymo = new Dymo_provider();
-            current_label= dymo.generate_label(RefrubHistoryObj);
+           
+            current_label = dymo.generate_label(RefrubHistoryObj);
             Preview = dymo.generate_preview(current_label);
             Printer_enable = true;
         }
         public void printAction()
         {
-            current_label.Print(Selected_printer);
+            //validate if magento have exisiting listing
+            //insert listing if listing is non exisit
+            magento_listing mage = new magento_listing();
+            mage.get_exisiting(RefrubHistoryObj);
+           // current_label.Print(Selected_printer);
         }
 
         private ICommand print;
@@ -129,6 +251,25 @@ namespace modern_label
                         }
                     
                         break;
+                    case "Label_cpu":
+                        if (current_label != null)
+                        {
+                            current_label.SetObjectText("cpu", Label_cpu);
+                        }
+                        break;
+                    case "Label_ram":
+                        if (current_label != null)
+                        {
+                            current_label.SetObjectText("ram", Label_ram + "GB");
+                        }
+                        break;
+                    case "Label_hdd":
+                        if (current_label != null)
+                        {
+                            current_label.SetObjectText("hdd", Label_hdd + "GB");
+                        }
+                        break;
+
                     case "Db_select_item":
                        
                   
@@ -325,6 +466,8 @@ namespace modern_label
 
         }
 
+     
+
         private string selected_printer;
         public string Selected_printer
         {
@@ -339,10 +482,25 @@ namespace modern_label
         }
 
 
-        public List<string> Grade_list
+       
+
+        public List<LabelModel.grade> Grade_list
         {
             get { return LabelModel.grade_list; }
-            set { LabelModel.grade_list = value; }
+            set { LabelModel.grade_list = value;
+                RaisePropertyChanged("Grade_list");
+            }
+        }
+
+
+        private string grade_selected_value;
+        public string grade_Selected_value
+        {
+            get { return grade_selected_value; } 
+            set {
+                grade_selected_value = value;
+                RaisePropertyChanged("grade_Selected_value");
+            }
         }
 
         private string selected_sku;
@@ -471,59 +629,8 @@ namespace modern_label
             }
 
         }
-
-        
-        public LabelViewModel(IDialogCoordinator dialogCoordinator)
-        {
-            _dialogCoordinator = dialogCoordinator;
-            //user dropdown data
-            //saving user data to a list
-            try
-            {
-
-                RefrubHistoryObj = new RefrubHistoryObj();
-                LabelModel = new LabelModel();
-                _canExecute = true;
-                //user name list
-                LabelModel.users = new List<string>();
-                LabelModel.db_select = new List<string>();
-                
-                LabelModel.db_select.Add("MYSQL");
-                LabelModel.db_select.Add("SQLite");
-                LabelModel.is_mysql_open = mysql_data.ping();
-                LabelModel.is_sqlite_open = sqlite_data.ping();
-                
-                submit_precoa = "00999-999-000-999";
-
-
-                //ping sqlite
-
-                LabelModel.sqlite_status = "SQLite : Online";
-               
-
-                //ping mysql
-                
-                LabelModel.mysql_status = "MySQl : Online";
-               
-
-
-                
-                if (LabelModel.is_mysql_open == false)
-                {
-                    LabelModel.mysql_status = "MySQl : Offline";
-                }
-                if (LabelModel.is_sqlite_open == false)
-                {
-                    LabelModel.sqlite_status = "SQLite : Offline";
-                   
-                }
-            }
-            catch {
-                //update the status bar message to fail
-                
-            }
-            
-        }
+       
+      
 
 
         private bool history_fly;
@@ -636,10 +743,12 @@ namespace modern_label
 
         }
 
-        public List<string>Computer_type
+
+
+        public List<LabelModel.computer_type>Computer_type
         {
-            get { return LabelModel.computer_type; }
-            set { LabelModel.computer_type = value; }
+            get { return LabelModel.computer_dropdown; }
+            set { LabelModel.computer_dropdown = value; }
 
         }
 
@@ -653,7 +762,22 @@ namespace modern_label
 
         }
 
+        private string computer_type_value;
+        public string Computer_type_value
+        {
+            get { return this.computer_type_value; }
+            set
+            {
 
+
+                computer_type_value = value;
+                RaisePropertyChanged("Computer_type_value");
+
+
+            }
+
+
+        }
         private string computer_type_selected;
         public string Computer_type_selected
         {
@@ -661,11 +785,8 @@ namespace modern_label
             set
             {
 
-               
                     computer_type_selected = value;
-                    RaisePropertyChanged("Computer_type_selected");
-                
-
+                    RaisePropertyChanged("Computer_type_selected");  
             }
 
 

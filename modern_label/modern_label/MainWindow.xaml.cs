@@ -24,6 +24,7 @@ namespace modern_label
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+
         private LabelViewModel labelViewModel;
         private RefrubHistoryObj RefrubHistoryObj;
         public Idbprovider mysql_data = new Mysql_DataProvider();
@@ -31,7 +32,6 @@ namespace modern_label
         public MainWindow()
         {
            
-
             Tuple<AppTheme, Accent> appStyle = ThemeManager.DetectAppStyle(Application.Current);
             ThemeManager.ChangeAppStyle(Application.Current,
                                     ThemeManager.GetAccent("Teal"),
@@ -216,6 +216,17 @@ namespace modern_label
         private void db_select_Loaded(object sender, RoutedEventArgs e)
         {
             db_select.SelectedIndex = 0;
+        }
+
+        private void grade_dropdown_Loaded(object sender, RoutedEventArgs e)
+        {
+            grade_dropdown.SelectedIndex = 0;
+        }
+
+        private void computerType_drop_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+           
+            
         }
     }
 

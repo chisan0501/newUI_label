@@ -35,6 +35,13 @@ namespace modern_label
 
         }
 
+        public Dictionary<String, int> sku_brand()
+        {
+            var result = new Dictionary<string, int>();
+
+            return result;
+        }
+
         public List<string> channel_list()
         {
 

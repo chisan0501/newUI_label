@@ -18,5 +18,6 @@ namespace modern_label
         List<string> channel_list();
         List<string> sku_list(string channel);
         RefrubHistoryObj redisco_data(int asset);
+        Dictionary<String, int> sku_brand();
     }
 }
