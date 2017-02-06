@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MySql.Data.MySqlClient;
 using MahApps.Metro.Controls.Dialogs;
+using System.Configuration;
 
 namespace modern_label
 {
@@ -25,13 +26,14 @@ namespace modern_label
     public partial class MainWindow : MetroWindow
     {
 
+
         private LabelViewModel labelViewModel;
         private RefrubHistoryObj RefrubHistoryObj;
-        public Idbprovider mysql_data = new Mysql_DataProvider();
-        public Idbprovider sqlite_data = new SQlite_DataProvider();
+      //  Mysql_DataProvider  mysql_data = new Mysql_DataProvider();
+        //public Idbprovider sqlite_data = new SQlite_DataProvider();
         public MainWindow()
         {
-           
+
             Tuple<AppTheme, Accent> appStyle = ThemeManager.DetectAppStyle(Application.Current);
             ThemeManager.ChangeAppStyle(Application.Current,
                                     ThemeManager.GetAccent("Teal"),
@@ -84,42 +86,12 @@ namespace modern_label
         {
             try
             {
-                if (e.Key == Key.Enter)
+               if (e.Key == Key.Enter)
                 {
 
-                    discovery_result.IsOpen = true;
-                    search_result.IsOpen = true;
-                    var discovery = mysql_data.discovery_data(search_box.Text);
-                    discovery_result_title.Text = search_box.Text;
-                    result_title.Text = search_box.Text;
-                    discovery_search_cpu.Text = discovery.search_cpu.ToString();
-                    discovery_search_hdd.Text = discovery.search_hdd.ToString();
-                    discovery_search_ram.Text = discovery.search_ram.ToString();
-                    discovery_search_manu.Text = discovery.search_manu;
-                    discovery_search_model.Text = discovery.search_model;
-                    discovery_search_serial.Text = discovery.search_serial;
-                    discovery_search_optical_drive.Text = discovery.search_optical_drive;
-
-
-
-                    var search = new search_result(search_box.Text);
-                    search_cpu.Text = search.cpu;
-                    search_hdd.Text = search.hdd.ToString();
-                    search_ram.Text = search.ram.ToString();
-                    search_manu.Text = search.manu;
-                    search_model.Text = search.model;
-                    search_serial.Text = search.serial;
-                    search_optical_drive.Text = search.optical_drive;
-                    search_sku.Text = search.sku;
-                    var img_search = new imaging_search_result(search_box.Text);
-                    imaging_title.Text = search_box.Text;
-                    imaging_search_wcoa.Text = img_search.img_wcoa;
-                    imaging_search_ocoa.Text = img_search.img_ocoa;
-                    imaging_search_hdd.Text = img_search.img_hdd.ToString();
-                    imaging_search_ram.Text = img_search.img_ram.ToString();
-                    imaging_search_video.Text = img_search.img_video;
-                    imaging_search_sku.Text = img_search.img_sku;
-                }
+                   discovery_result.IsOpen = true;
+                    search_result.IsOpen = true;     
+               }
             }
             catch
             {
@@ -129,22 +101,7 @@ namespace modern_label
 
 
         //click event on the edit button from flyout
-        private async void search_edit_Click(object sender, RoutedEventArgs e)
-        {
-
-           
-            string connStr = "Server=MYSQL5013.Smarterasp.net;Database=db_a094d4_icdb;Uid=a094d4_icdb;Pwd=icdb123!;Pooling=true";
-
-            MySqlConnection conn = new MySqlConnection(connStr);
-            MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "UPDATE rediscovery SET cpu = '" + search_cpu.Text + "',hdd='" + search_hdd.Text + "',ram='" + search_ram.Text + "',brand= '" + search_manu.Text + "',model='" + search_model.Text + "',serial = '" + search_serial.Text + "',optical_drive = '" + search_optical_drive.Text + "',pallet = '" + search_sku.Text + "' WHERE ictag = '" + result_title.Text + "'";
-            conn.Open();
-            command.ExecuteNonQuery();
-            conn.Close();
-
-            await this.ShowMessageAsync("Message", "Rediscovery data Updated");
-
-        }
+        
 
         private void setting_btn_Click(object sender, RoutedEventArgs e)
         {
@@ -165,7 +122,7 @@ namespace modern_label
 
             MySqlConnection conn = new MySqlConnection(connStr);
             MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "UPDATE production_log SET wcoa = '" + imaging_search_wcoa.Text + "',ocoa='" + imaging_search_ocoa.Text + "',RAM='" + imaging_search_ram.Text + "',HDD= '" + imaging_search_hdd.Text + "',channel='" + imaging_search_sku.Text + "',video_card = '" + imaging_search_video.Text + "' WHERE ictags = '" + result_title.Text + "'";
+            command.CommandText = "UPDATE production_log SET RAM='" + imaging_search_ram.Text + "',HDD= '" + imaging_search_hdd.Text + "',channel='" + imaging_search_sku.Text + "',video_card = '" + imaging_search_video.Text + "' WHERE ictags = '" + imaging_title.Text + "'";
             conn.Open();
             command.ExecuteNonQuery();
             conn.Close();
@@ -174,20 +131,7 @@ namespace modern_label
 
         }
 
-        private async void discovery_search_edit_Click(object sender, RoutedEventArgs e)
-        {
-            string connStr = "Server=MYSQL5013.Smarterasp.net;Database=db_a094d4_icdb;Uid=a094d4_icdb;Pwd=icdb123!;Pooling=true";
-
-            MySqlConnection conn = new MySqlConnection(connStr);
-            MySqlCommand command = conn.CreateCommand();
-            command.CommandText = "UPDATE discovery SET cpu = '" + discovery_search_cpu.Text + "',hdd='" + discovery_search_hdd.Text + "',ram='" + discovery_search_ram.Text + "',brand= '" + discovery_search_manu.Text + "',model='" + discovery_search_model.Text + "',serial = '" + discovery_search_serial.Text + "',optical_drive = '" + discovery_search_optical_drive.Text + "' WHERE ictag = '" + result_title.Text + "'";
-            conn.Open();
-            command.ExecuteNonQuery();
-            conn.Close();
-
-            await this.ShowMessageAsync("Message", "Discovery data Updated");
-        }
-
+     
         private void search_box_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             search_box.Text = "";
@@ -215,7 +159,7 @@ namespace modern_label
 
         private void db_select_Loaded(object sender, RoutedEventArgs e)
         {
-            db_select.SelectedIndex = 0;
+           
         }
 
         private void grade_dropdown_Loaded(object sender, RoutedEventArgs e)
@@ -225,10 +169,94 @@ namespace modern_label
 
         private void computerType_drop_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-           
             
         }
+        private void channel_dropdown_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (channel_dropdown.SelectedItem != null)
+            {
+                switch (channel_dropdown.SelectedItem.ToString())
+                {
+                    case "OEM (Laptop)":
+                    case "OEM (Desktop)":
+                    case "Mar (Desktop)":
+                    case "Mar (Laptop)":
+                    case "Online Order":
+                    case "My Channel is not Listed":
+                        sku_dropdown.SelectedIndex = 0;
+                        break;
+                }
+            }
+               
+        }
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            Asset_tag.Text = string.Empty;
+            Pre_COA.Text = "00999-999-000-999";
+
+
+            //foreach (var c in win_sp.Children)
+            //{
+            //    if (c.GetType() == typeof(TextBox))
+            //    {
+            //        ((TextBox)(c)).Text = string.Empty;
+            //    }
+
+            //}
+        }
+
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://ic.icdb.name/Dymo/apple");
+        }
+
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                var request = new TraversalRequest(FocusNavigationDirection.Next);
+                request.Wrapped = true;
+                search_rma_box.MoveFocus(request);
+            }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            Rma_comment_box.Text = "";
+            
+            search_rma_box.Text = "";
+
+        }
+        private MetroWindow accentThemeTestWindow;
+
+        private void ChangeAppStyleButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (accentThemeTestWindow != null)
+            {
+                accentThemeTestWindow.Activate();
+                return;
+            }
+
+            accentThemeTestWindow = new AccentStyleWindow();
+            accentThemeTestWindow.Owner = this;
+            accentThemeTestWindow.Closed += (o, args) => accentThemeTestWindow = null;
+            accentThemeTestWindow.Left = this.Left + this.ActualWidth / 2.0;
+            accentThemeTestWindow.Top = this.Top + this.ActualHeight / 2.0;
+            accentThemeTestWindow.Show();
+        }
+
+        private void serial_search_rma_box_KeyDown(object sender, KeyEventArgs f)
+        {
+            if (f.Key == Key.Enter)
+            {
+                var request = new TraversalRequest(FocusNavigationDirection.Next);
+                request.Wrapped = true;
+                serial_search_rma_box.MoveFocus(request);
+            }
+        }
     }
+    
 
 
     }

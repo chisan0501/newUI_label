@@ -1,5 +1,6 @@
 ﻿using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
+using modern_label.org.connectall;
 using MvvmValidation;
 using MySql.Data.MySqlClient;
 using System;
@@ -19,8 +20,9 @@ namespace modern_label
 {
     class LabelViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     {
-       
-
+        
+        
+        public static string db_source;
         public DYMO.Label.Framework.ILabel current_label;
         private readonly IDialogCoordinator _dialogCoordinator;
         protected ValidationHelper Validator { get; private set; }
@@ -65,51 +67,55 @@ namespace modern_label
                 Validator.AddRequiredRule(() => Selected_sku, "SKU is required");
                 NotifyDataErrorInfoAdapter.ErrorsChanged += OnErrorsChanged;
                 RefrubHistoryObj = new RefrubHistoryObj();
+                discovery_result = new discovery_result();
+               
                 LabelModel = new LabelModel();
+                //add db select list
+                DB_select = LabelModel.db_select;
+                Computer_type = LabelModel.computer_dropdown;
+                Grade_list = LabelModel.grade_list;
+                Printer_list = LabelModel.printer_list;
+                channel_list = mysql_data.channel_list();
                 _canExecute = true;
-                //user name list
-                LabelModel.users = new List<string>();
-                LabelModel.db_select = new List<string>();
-
-                LabelModel.db_select.Add("MYSQL");
-                LabelModel.db_select.Add("SQLite");
-                LabelModel.is_mysql_open = mysql_data.ping();
-                LabelModel.is_sqlite_open = sqlite_data.ping();
+            
+                
+                //ping db
+                is_mysql_open = mysql_data.ping();
+                //get user
+                Users = mysql_data.users();
+              
 
                 submit_precoa = "00999-999-000-999";
 
+                Enable_history_btn = true;
 
-                //ping sqlite
-
-                LabelModel.sqlite_status = "SQLite : Online";
-
-
-                //ping mysql
-
-                LabelModel.mysql_status = "MySQl : Online";
-
-
-
-
-                if (LabelModel.is_mysql_open == false)
-                {
-                    LabelModel.mysql_status = "MySQl : Offline";
+                this.Db_index = 1 ;
+                Sqlite_Status = "Local Database : Offline";
+                Mysql_Status = "MySQl Database: Offline";
+                if (mysql_data.ping() == true)
+                { 
+                    Mysql_Status = "MySQl Database: Online";
+                    this.Db_index = 0;
                 }
                 if (LabelModel.is_sqlite_open == false)
                 {
-                    LabelModel.sqlite_status = "SQLite : Offline";
-
+                    Sqlite_Status = "Local Database : Online";
+                    
                 }
             }
-            catch
+            catch (Exception e)
             {
                 //update the status bar message to fail
-
+              
+                 
+                
             }
 
         }
 
+        //custom diaglog popup
         public async void customAction() {
+            
             MvvmValidation.ValidationResult validationResult = Validator.ValidateAll();
             string message = "Please Check the following input: \n\r";
             foreach (var item in validationResult.ErrorList)
@@ -123,8 +129,17 @@ namespace modern_label
                 return;
             }
             string sku = "Empty";
+    
             var listing = new magento_listing();
+
             RefrubHistoryObj = mysql_data.redisco_data(submit_asset);
+            if (RefrubHistoryObj.cpu == null)
+            {
+                message = "Asset Not Found in Rediscovery.";
+                await _dialogCoordinator.ShowMessageAsync(this, "Error", message);
+                return;
+            }
+
             RefrubHistoryObj.refurbisher = this.Users_SelectedValue;
             RefrubHistoryObj.sku = sku + grade_Selected_value;
             RefrubHistoryObj.channel = Selected_channel;
@@ -135,6 +150,8 @@ namespace modern_label
 
             switch (selected_channel)
             {
+                case "OEM (Desktop)":
+                case "OEM (Laptop)":
                 case "Mar (Desktop)":
                 case "Mar (Laptop)":
                     //format the sku before passing on
@@ -143,11 +160,13 @@ namespace modern_label
                     var temp_brand = magento_sku.compute_difference(RefrubHistoryObj.made, magento_sku.brand_name());
                     RefrubHistoryObj.brand = temp_brand;
                      var temp_cpu = magento_sku.comput_title(RefrubHistoryObj);
-                    var temp_ram = magento_sku.ram_format(RefrubHistoryObj, false);
-                    var temp_hdd = magento_sku.hdd_format(false, RefrubHistoryObj);
-                    RefrubHistoryObj.sku = temp_brand + "_" + RefrubHistoryObj.model + "_" + temp_cpu + "_" + temp_ram + "_" + temp_hdd + RefrubHistoryObj.type + RefrubHistoryObj.grade;
+                     RefrubHistoryObj.ram  = magento_sku.ram_format(RefrubHistoryObj, false);
+                    RefrubHistoryObj.hdd = magento_sku.hdd_format(false, RefrubHistoryObj);
+                    RefrubHistoryObj.grade = grade_Selected_value;
+                 
                     var magento_listing = listing.listing_info(RefrubHistoryObj);
                     RefrubHistoryObj = magento_sku.format_sku(RefrubHistoryObj);
+                    RefrubHistoryObj.sku = RefrubHistoryObj.brand + "_" + RefrubHistoryObj.model + "_" + temp_cpu + "_" + RefrubHistoryObj.ram + "_" + RefrubHistoryObj.hdd + RefrubHistoryObj.type + RefrubHistoryObj.grade;
                     break;
                 case "Online Order":                  
                     await _dialogCoordinator.ShowInputAsync(this, "Online Order", "Please Enter Order #").ContinueWith(t => sku = (t.Result));
@@ -167,12 +186,32 @@ namespace modern_label
             Label_ram = RefrubHistoryObj.ram;
             Label_hdd = RefrubHistoryObj.hdd;
             Label_serial = RefrubHistoryObj.serial;
-            
+            switch (selected_channel)
+            {
+                case "OEM (Desktop)":
+                case "OEM (Laptop)":
+                    RefrubHistoryObj.sku = "OEM_" + RefrubHistoryObj.sku;
+                    break;
+            }
+            Label_sku = RefrubHistoryObj.sku;
+            var img_result = mysql_data.img_data(submit_asset.ToString());
+            Img_wcoa = img_result.img_wcoa;
+            Img_ocoa = img_result.img_ocoa;
+            Img_sku = img_result.img_sku;
+            Img_ram = img_result.img_ram;
+            Img_hdd = img_result.img_hdd;
+            Img_video = img_result.img_video;
+
             var dymo = new Dymo_provider();
            
             current_label = dymo.generate_label(RefrubHistoryObj);
             Preview = dymo.generate_preview(current_label);
             Printer_enable = true;
+
+
+           
+
+
         }
         public void printAction()
         {
@@ -180,7 +219,29 @@ namespace modern_label
             //insert listing if listing is non exisit
             magento_listing mage = new magento_listing();
             mage.get_exisiting(RefrubHistoryObj);
-           // current_label.Print(Selected_printer);
+            current_label.Print(Selected_printer);
+          if (Copy_discovery == true)
+            {
+                mysql_data.discovery_insert(RefrubHistoryObj);
+            }
+            bool sucess = mysql_data.insert(RefrubHistoryObj);
+        }
+
+        public string rma_id;
+
+
+        
+
+        private string add_channel;
+        public string Add_channel
+        {
+            get
+            {
+                return add_channel;
+            }set
+            {
+                add_channel = value;
+            }
         }
 
         private ICommand print;
@@ -194,8 +255,85 @@ namespace modern_label
 
         }
 
-        private ICommand showInputDialogCommand;
+        public async void EditAction()
+        {
+            string message = "";
+            Rma_finding = "Refrubisher: " + Users_SelectedValue + "\r\nDate received: " + Today + "\r\nDiagnostic finding: " + Rma_comment + Next_process;
+            bool sucess = sf.update_rma(rma_id, rma_finding, rma_ictag);
+            if (sucess == true)
+            {
+                message = "RMA Info Updated";
+                await _dialogCoordinator.ShowMessageAsync(this, "Message", message);
+            }
+            else
+            {
+                message = "An error has occurred";
+                await _dialogCoordinator.ShowMessageAsync(this, "Error", message);
+            }
+        }
 
+        public async void AddChannelAction()
+        {
+            if (string.IsNullOrEmpty(Add_channel))
+            {
+                string message = "Channel Name cant be Empty";
+                await _dialogCoordinator.ShowMessageAsync(this, "Error", message);
+            }
+            else {
+                string sku = "";
+                await _dialogCoordinator.ShowInputAsync(this, "Additional Information Required", "Please Enter SKU").ContinueWith(t => sku = (t.Result));
+                var result = mysql_data.add_channel(Add_channel, sku);
+
+                if (result == true)
+                {
+                    string message = "Channel Added";
+                    await _dialogCoordinator.ShowMessageAsync(this, "Message", message);
+                }
+                else
+                {
+                    string message = "Something went Wrong";
+                    await _dialogCoordinator.ShowMessageAsync(this, "Error", message);
+                }
+            }
+            
+        }
+
+        private ICommand addChannelCommand;
+        public ICommand AddChannelCommand
+        {
+            get
+            {
+                
+                return addChannelCommand ?? (addChannelCommand = new CommandHandler(() => AddChannelAction(), _canExecute));
+               
+            }
+        }
+
+        private int db_index;
+        public int Db_index
+        {
+            get
+            {
+                return db_index;
+            }
+            set
+            {
+                db_index = value;
+                RaisePropertyChanged("Db_index");
+            }
+        }
+
+
+        private ICommand edit_rma;
+        public ICommand Edit_rma
+        {
+            get
+            {
+                return edit_rma ?? (edit_rma = new CommandHandler(() => EditAction(), _canExecute));
+            }
+        }
+
+        private ICommand showInputDialogCommand;
         public ICommand ShowInputDialogCommand
         {
             get
@@ -204,15 +342,177 @@ namespace modern_label
                 
             }
         }
+        private string rma_finding;
+        public string Rma_finding {
+
+            get { return rma_finding; }
+            set
+            {
+                rma_finding = value;
+                RaisePropertyChanged("rma_finding");
+            }
+
+        }
+
+        private string rma_channel;
+        public string Rma_channel
+        {
+            get { return rma_channel; }
+            set
+            {
+                rma_channel = value;
+                RaisePropertyChanged("rma_channel");
+            }
+
+        }
+
+        private string rma_number;
+        public string Rma_number
+        {
+            get { return rma_number; }
+            set
+            {
+                rma_number = value;
+                RaisePropertyChanged("rma_number");
+            }
+        }
+
+        private DateTime rma_date;
+        public DateTime Rma_date
+        {
+            get { return rma_date; }
+            set
+            {
+                rma_date = value;
+                RaisePropertyChanged("rma_date");
+            }
+        }
+
+        private string rma_ictag;
+        public string Rma_ictag
+        {
+            get { return rma_ictag; }
+            set
+            {
+                rma_ictag = value;
+                RaisePropertyChanged("rma_ictag");
+            }
+        }
+        private string rma_serial;
+        public string Rma_serial
+        {
+            get { return rma_serial; }
+            set
+            {
+                rma_serial = value;
+                RaisePropertyChanged("rma_serial");
+            }
+        }
+
+
+        public DateTime Today
+        {
+            get { return DateTime.Now; } 
+            set { Today = value;
+                RaisePropertyChanged("today");
+            }
+
+        }
+
+
+        private bool refrub_checked;
+        public bool Refrub_checked
+        {
+            get { return refrub_checked; }
+            set
+            {
+                refrub_checked = value;
+                RaisePropertyChanged("Refrub_checked");
+            }
+        }
+        private bool recycle_checked;
+        public bool Recycle_checked
+        {
+            get { return recycle_checked; }
+            set
+            {
+                recycle_checked = value;
+                RaisePropertyChanged("Recycle_checked");
+            }
+        }
+        private bool ebay_checked;
+        public bool Ebay_checked
+        {
+            get { return ebay_checked; }
+            set
+            {
+                ebay_checked = value;
+                RaisePropertyChanged("Ebay_checked");
+            }
+        }
+        private string rma_desc;
+        public string Rma_desc
+        {
+            get { return rma_desc; }
+            set
+            {
+                rma_desc = value;
+                RaisePropertyChanged("rma_desc");
+            }
+        }
+
+        private string next_process;
+        public string Next_process
+        {
+            get { return next_process; }
+            set
+            {
+                next_process = value;
+                RaisePropertyChanged("next_process");
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged = null;
-        protected virtual void RaisePropertyChanged(string propName)
+        protected virtual async void RaisePropertyChanged(string propName)
         {
 
             if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propName));
 
-                switch (propName) {
+                switch (propName)
+                {
+                    case "Db_index":
+
+                        switch (Db_index)
+                        {
+                            case (0):
+                                Enable_history_btn = true;
+                                db_source = "Online DB";
+                                mysql_data.change_connection_string(db_source);
+                                channel_list = mysql_data.channel_list();
+                              
+                                Users = mysql_data.users();
+
+
+
+                                break;
+
+
+                            case (1):
+
+                                Enable_history_btn = false;
+                                db_source = "Local DB";
+                                mysql_data.change_connection_string(db_source);
+                                channel_list = mysql_data.channel_list();
+                                
+                                Users = mysql_data.users();
+
+
+                                // Users = sql_lite_user_list.users;
+                                break;
+                        }
+                        break;
                     //gererate list for flyout on histroy button
                     case "History_fly":
 
@@ -220,16 +520,69 @@ namespace modern_label
                         MyList = mysql_data.db_history();
 
                         break;
-                      
+
                     case "Selected_sku":
 
                         break;
-
-                    case "Asset_tag":
-                        
-                        var discovery_result = new discovery_result(this.asset_tag);
+                    case "Rma_serial_search":
+                        sf = new sf();
+                        rma_result = sf.get_rma_serial(rma_serial_search);
+                        Rma_number = rma_result.rma_number;
+                        Rma_channel = rma_result.channel;
+                        Rma_date = rma_result.date_request;
+                        Rma_desc = rma_result.rma_description;
+                        Rma_ictag = rma_result.asset_tag;
+                        Rma_serial = rma_result.serial;
+                        rma_id = rma_result.id;
                         break;
-                     //chnage text on user selected
+                    case "rma_asset":
+                        sf = new sf();
+                        rma_result = sf.get_rma(Rma_asset);
+                        Rma_number = rma_result.rma_number ;
+                        Rma_channel = rma_result.channel;
+                        Rma_date = rma_result.date_request;
+                        Rma_desc = rma_result.rma_description;
+                        Rma_ictag = rma_result.asset_tag;
+                        Rma_serial = rma_result.serial;
+                        Rma_comment = rma_result.production_finding;
+                        rma_id = rma_result.id;
+                       
+
+                        break;
+
+                    case "Refrub_checked":
+                        Next_process = "\r\nNext process: Refrubish";
+                        break;
+                    case "Recycle_checked":
+                        Next_process = "\r\nNext process: Recycle";
+                        break;
+                    case "Ebay_checked":
+                        Next_process = "\r\nNext process: Ebay";
+                        break;
+                    case "Asset_tag":
+
+                    var discovery_temp = new discovery_result(Asset_tag);
+                        discovery_result = discovery_temp;
+                        Search_optical = discovery_temp.optical_drive;
+                        Search_cpu = discovery_temp.cpu;
+                        Search_hdd = discovery_temp.hdd;
+                        Search_manu = discovery_temp.manu;
+                        Search_ram = discovery_temp.ram;
+                        Search_model = discovery_temp.model;
+                        Search_serial = discovery_temp.serial; 
+                        
+                        var rediscovery_temp = new search_result(Asset_tag);
+                        search_result = rediscovery_temp;
+                        Rediscovery_search_cpu = rediscovery_temp.cpu;
+                        Rediscovery_search_optical = rediscovery_temp.optical_drive;
+                        Rediscovery_search_hdd = rediscovery_temp.hdd;
+                        Rediscovery_search_manu = rediscovery_temp.manu;
+                        Rediscovery_search_ram = rediscovery_temp.ram;
+                        Rediscovery_search_model = rediscovery_temp.model;
+                        Rediscovery_search_serial = rediscovery_temp.serial;
+                        Rediscovery_search_sku = rediscovery_temp.sku;
+                        break;
+                    //chnage text on user selected
                     case "Users_SelectedValue":
                         Welcome_text = this.Users_SelectedValue;
                         User_status = this.Users_SelectedValue;
@@ -238,18 +591,24 @@ namespace modern_label
                         Computer_type_status = "Computer Type : " + Computer_type_selected;
                         break;
                     case "Submit_asset":
-                        
+
                         break;
                     case "Selected_channel":
-                       
-                       Sku_list = mysql_data.sku_list(selected_channel);
+
+                        Sku_list = mysql_data.sku_list(selected_channel);
+
+                        break;
+                    case "Copy_discovery":
 
                          break;
+
                     case "Label_model":
-                        if (current_label != null) {
-                            current_label.SetObjectText("manu", Label_model); 
+                        if (current_label != null)
+                        {
+                            current_label.SetObjectText("manu", Label_model);
+                            this.RefrubHistoryObj.model = Label_model;
                         }
-                    
+
                         break;
                     case "Label_cpu":
                         if (current_label != null)
@@ -261,43 +620,41 @@ namespace modern_label
                         if (current_label != null)
                         {
                             current_label.SetObjectText("ram", Label_ram + "GB");
+                            this.RefrubHistoryObj.ram = Label_ram;
                         }
                         break;
                     case "Label_hdd":
                         if (current_label != null)
                         {
                             current_label.SetObjectText("hdd", Label_hdd + "GB");
+                            this.RefrubHistoryObj.hdd = Label_hdd;
                         }
                         break;
-
-                    case "Db_select_item":
-                       
-                  
-                    switch (Db_select_item)
+                    case "Label_sku":
+                        if (current_label != null)
                         {
-                            case ("MYSQL"):
-                                Enable_history_btn = true;
-                                
-                                var user_list = mysql_data.users();
-                                Users.Clear();
-                                Users = user_list.users;
+                            try
+                            {
+                                current_label.SetObjectText("pallet", Label_sku);
+                                current_label.SetObjectText("BARCODE", Label_sku);
+                                RefrubHistoryObj.sku = Label_sku;
+                            }
+                         
+                            
+                           catch
+                            {
+                              
+                                await _dialogCoordinator.ShowMessageAsync(this, "Error", "SKU Length Exceed Allowed Label Width");
+                            }
 
-                                break;
-
-
-                            case ("SQLite"):
-
-                                Enable_history_btn = false;
-                                var sql_lite_user_list = mysql_data.users();
-                                Users.Clear();
-                                Users = sql_lite_user_list.users;
-                                break;
                         }
+
                         break;
+                   
 
 
                 }
-                
+
             }
         }
         //command class for binding event 
@@ -324,16 +681,16 @@ namespace modern_label
             }
         }
 
-        
+        private BitmapImage preview;
         public  BitmapImage Preview
         {
             get
             {
-                return LabelModel.Preview;
+                return preview;
             }
             set
             {
-                LabelModel.Preview = value;
+                preview = value;
                 RaisePropertyChanged("Preview");
             }
         }
@@ -363,6 +720,302 @@ namespace modern_label
            
         }
 
+
+        private string rma_comment;
+        public string Rma_comment
+        {
+            get { return rma_comment; }
+            set
+            {
+                rma_comment = value;
+                RaisePropertyChanged("rma_comment");
+            }
+        }
+
+        private string rma_serial_search;
+        public string Rma_serial_search
+        {
+            get { return rma_serial_search; }
+            set
+            {
+                rma_serial_search = value;
+                RaisePropertyChanged("Rma_serial_search");
+            }
+        }
+
+        private string rma_asset;
+        public string Rma_asset
+        {
+
+            get { return rma_asset; }
+            set
+            {
+                rma_asset = value;
+                RaisePropertyChanged("rma_asset");
+            } 
+
+
+        }
+
+        private string img_ram;
+        public string Img_ram
+        {
+            get
+            {
+                return img_ram;
+            }
+            set
+            {
+                img_ram = value;
+                RaisePropertyChanged("img_ram");
+            }
+        }
+        private string img_hdd;
+        public string Img_hdd
+        {
+            get
+            {
+                return img_hdd;
+            }
+            set
+            {
+
+                img_hdd = value;
+                RaisePropertyChanged("img_hdd");
+            }
+        }
+        private string img_video;
+        public string Img_video
+        {
+            get
+            {
+                return img_video;
+            }
+            set
+            {
+                img_video = value;
+                RaisePropertyChanged("img_video");
+            }
+        }
+        private string img_sku;
+        public string Img_sku
+        {
+            get
+            {
+                return img_sku; ;
+            }
+            set
+            {
+                img_sku = value;
+                RaisePropertyChanged("img_sku");
+            }
+        }
+
+        private string img_ocoa;
+        public string Img_ocoa
+        {
+            get
+            {
+                return img_ocoa;
+            }
+            set
+            {
+                img_ocoa = value;
+                RaisePropertyChanged("img_ocoa");
+            }
+        }
+        private string img_wcoa;
+        public string Img_wcoa
+        {
+            get { return img_wcoa; }
+            set
+            {
+                img_wcoa = value;
+                RaisePropertyChanged("img_wcoa");
+            }
+        }
+
+        private string rediscovery_search_optical;
+        public string Rediscovery_search_optical
+        {
+            get { return rediscovery_search_optical; }
+            set
+            {
+                rediscovery_search_optical = value;
+                RaisePropertyChanged("rediscovery_search_optical");
+            }
+        }
+
+        private string rediscovery_search_serial;
+        public string Rediscovery_search_serial
+        {
+            get { return rediscovery_search_serial; }
+            set
+            {
+                rediscovery_search_serial = value;
+                RaisePropertyChanged("rediscovery_search_serial");
+            }
+        }
+
+        private long rediscovery_search_hdd;
+        public long Rediscovery_search_hdd
+        {
+            get { return rediscovery_search_hdd; }
+            set
+            {
+                rediscovery_search_hdd = value;
+                RaisePropertyChanged("rediscovery_search_hdd");
+            }
+        }
+
+        public long rediscovery_search_ram;
+        public long Rediscovery_search_ram
+        {
+            get { return rediscovery_search_ram; }
+            set
+            {
+                rediscovery_search_ram = value;
+                RaisePropertyChanged("rediscovery_search_ram");
+            }
+        }
+
+        public string rediscovery_search_manu;
+        public string Rediscovery_search_manu
+        {
+            get { return rediscovery_search_manu; }
+            set
+            {
+                rediscovery_search_manu = value;
+                RaisePropertyChanged("rediscovery_search_manu");
+            }
+        }
+
+        public string rediscovery_search_model;
+        public string Rediscovery_search_model
+        {
+            get { return rediscovery_search_model; }
+            set
+            {
+                rediscovery_search_model = value;
+                RaisePropertyChanged("rediscovery_search_model");
+            }
+        }
+
+        private string rediscovery_search_cpu;
+        public string Rediscovery_search_cpu
+        {
+            get { return rediscovery_search_cpu; }
+            set
+            {
+                rediscovery_search_cpu = value;
+                RaisePropertyChanged("rediscovery_search_cpu");
+            }
+        }
+
+        private string rediscovery_search_sku;
+        public string Rediscovery_search_sku
+        {
+            get { return rediscovery_search_sku; }
+            set
+            {
+                rediscovery_search_sku = value;
+                RaisePropertyChanged("rediscovery_search_sku");
+            }
+        }
+
+        private string search_optical;
+        public string Search_optical
+        {
+            get { return search_optical; }
+            set
+            {
+                search_optical = value;
+                RaisePropertyChanged("Search_optical");
+            }
+        }
+
+        private string search_serial;
+        public string Search_serial
+        {
+            get { return search_serial; }
+            set
+            {
+                search_serial = value;
+                RaisePropertyChanged("Search_serial");
+            }
+        }
+
+        private long search_hdd;
+        public long Search_hdd
+        {
+            get { return search_hdd; }
+            set
+            {
+                search_hdd = value;
+                RaisePropertyChanged("Search_hdd");
+            }
+        }
+
+        public long search_ram;
+        public long Search_ram
+        {
+            get { return search_ram; }
+            set
+            {
+                search_ram = value;
+                RaisePropertyChanged("Search_ram");
+            }
+        }
+
+        public string search_manu;
+        public string Search_manu
+        {
+            get { return search_manu; }
+            set
+            {
+                search_manu = value;
+                RaisePropertyChanged("Search_manu");
+            }
+        }
+
+        public string search_model;
+        public string Search_model
+        {
+            get { return search_model; }
+            set
+            {
+                search_model = value;
+                RaisePropertyChanged("Search_model");
+            }
+        }
+
+        private string search_cpu;
+        public string Search_cpu
+        {
+            get { return search_cpu; }
+            set
+            {
+                search_cpu = value;
+                RaisePropertyChanged("Search_cpu");
+            }
+        }
+
+        private bool copy_discovery;
+        public bool Copy_discovery
+        {
+
+            get
+            {
+                return copy_discovery;
+            }
+            set
+            {
+                copy_discovery = value;
+                RaisePropertyChanged("Copy_discovery");
+            }
+
+        }
+
         private bool printer_enable;
         public bool Printer_enable
         {
@@ -377,6 +1030,12 @@ namespace modern_label
             }
         }
 
+
+        
+     
+
+
+
         private string label_serial;
         public string Label_serial
         {
@@ -389,7 +1048,18 @@ namespace modern_label
             }
 
         }
+        private string label_sku;
+        public string Label_sku
+        {
 
+            get { return label_sku; }
+            set
+            {
+                label_sku = value;
+                RaisePropertyChanged("Label_sku");
+            }
+
+        }
         private string label_hdd;
         public string Label_hdd
         {
@@ -457,11 +1127,15 @@ namespace modern_label
 
         }
 
-
+        public List<string> printer_list;
         public List<string> Printer_list
         {
-            get { return LabelModel.printer_list; }
-            set { LabelModel.printer_list = value; }
+            get { return printer_list; }
+            set {
+                printer_list = value;
+                RaisePropertyChanged("printer_list");
+                    
+                    }
 
 
         }
@@ -482,12 +1156,12 @@ namespace modern_label
         }
 
 
-       
 
+        public List<LabelModel.grade> grade_list;
         public List<LabelModel.grade> Grade_list
         {
-            get { return LabelModel.grade_list; }
-            set { LabelModel.grade_list = value;
+            get { return grade_list; }
+            set { grade_list = value;
                 RaisePropertyChanged("Grade_list");
             }
         }
@@ -499,6 +1173,7 @@ namespace modern_label
             get { return grade_selected_value; } 
             set {
                 grade_selected_value = value;
+                
                 RaisePropertyChanged("grade_Selected_value");
             }
         }
@@ -541,6 +1216,77 @@ namespace modern_label
 
         }
 
+        //copy data to rediscovery table
+        private ICommand _copyTo_rediscovery_btn;
+        public ICommand copyTo_rediscovery_btn
+        {
+            get
+            {
+                return _clickCommand ?? (_copyTo_rediscovery_btn = new CommandHandler(() => edit_rediscoveryAction(), _canExecute));
+            }
+        }
+
+        //discovery search_edit button 
+        private ICommand _discovery_search_edit;
+        public ICommand discovery_search_edit
+        {
+            get
+            {
+                return _clickCommand ?? (_discovery_search_edit = new CommandHandler(() => discovery_search_edit_action(), _canExecute));
+            }
+        }
+
+
+        private async void edit_rediscoveryAction()
+        {
+        var  result =   mysql_data.copy_rediscovery_data(discovery_result.cpu, discovery_result.model, discovery_result.manu, discovery_result.ram.ToString(), discovery_result.hdd.ToString(), discovery_result.serial, Asset_tag);
+
+            if (result == true)
+            {
+                await _dialogCoordinator.ShowMessageAsync(this, "Message", "Data Copied to Rediscovery Table");
+            }
+            else
+            {
+                await _dialogCoordinator.ShowMessageAsync(this, "Error", "Data might have already exisit in Rediscovery table");
+            }
+            
+        }
+
+        private async void discovery_search_edit_action()
+        {
+            
+            discovery_result.hdd = Search_hdd;
+            discovery_result.ram = Search_ram;
+            discovery_result.serial = Search_serial;
+            discovery_result.optical_drive = Search_optical;
+            bool result = mysql_data.edit_discovery_data(discovery_result, Asset_tag);
+
+            await _dialogCoordinator.ShowMessageAsync(this, "Message", "discovery data Updated");
+        }
+
+        //search_edit button command
+        private ICommand _search_edit;
+        public ICommand search_edit
+        {
+            get
+            {
+                return _clickCommand ?? (_search_edit = new CommandHandler(() => search_edit_action(), _canExecute));
+            }
+        }
+
+        private async void search_edit_action()
+        {
+            search_result.sku = Rediscovery_search_sku;
+            search_result.hdd = Rediscovery_search_hdd;
+            search_result.ram = Rediscovery_search_ram;
+            search_result.serial = Rediscovery_search_serial;
+            search_result.optical_drive = Rediscovery_search_optical;
+            bool result = mysql_data.edit_rediscovery_data(search_result, Asset_tag);
+        
+            await _dialogCoordinator.ShowMessageAsync(this,"Message", "Rediscovery data Updated");
+        }
+
+
         //histroy click command
         private ICommand _clickCommand;
         public ICommand ClickCommand
@@ -554,10 +1300,16 @@ namespace modern_label
      
 
         private bool _canExecute;
-        public Idbprovider mysql_data = new Mysql_DataProvider();
-        public Idbprovider sqlite_data = new SQlite_DataProvider();
+       
+        public Mysql_DataProvider mysql_data = new Mysql_DataProvider(db_source);
+       // public Idbprovider sqlite_data = new SQlite_DataProvider();
         public RefrubHistoryObj RefrubHistoryObj { get; set; }
+        
+        public sf sf { get; set; }
+        public rma_result rma_result { get; set; }
         public LabelModel LabelModel { get; set; }
+        public discovery_result discovery_result { get; set; }
+        public search_result search_result { get; set; }
         private ObservableCollection<RefrubHistoryObj> myList;
         public ObservableCollection<RefrubHistoryObj> MyList {
 
@@ -607,12 +1359,16 @@ namespace modern_label
 
         }
 
-
+        private List<string> Channel_list;
         public List<string> channel_list
         {
-            get { return mysql_data.channel_list(); }
-            set {}
+            get { return Channel_list; }
+            set {
+                Channel_list = value;
+                RaisePropertyChanged("Channel_list");
 
+            }
+             
         }
      
 
@@ -744,19 +1500,21 @@ namespace modern_label
         }
 
 
-
+        private List<LabelModel.computer_type> computer_type;
         public List<LabelModel.computer_type>Computer_type
         {
-            get { return LabelModel.computer_dropdown; }
-            set { LabelModel.computer_dropdown = value; }
+            get { return computer_type; }
+            set { computer_type = value;
+                RaisePropertyChanged("computer_type");
+                    }
 
         }
-
+        private List<string> db_select;
         public List<string>DB_select
         {
-            get { return LabelModel.db_select; }
-            set { LabelModel.db_select = value;
-
+            get { return db_select; }
+            set { db_select = value;
+                RaisePropertyChanged("Db_select");
             }
 
 
@@ -802,246 +1560,57 @@ namespace modern_label
 
 
         }
-
+        private List<string> users;
         public List<string> Users
         {
-            get { return LabelModel.users; }
-            set { LabelModel.users = value;
+            get { return users; }
+            set { users = value;
                 RaisePropertyChanged("Users");
                
             }
 
         }
-        
+        private bool is_mysql_open;
         public bool Is_Mysql_open
         {
-            get { return LabelModel.is_mysql_open; }
-            set { LabelModel.is_mysql_open = value; }
+            get { return is_mysql_open; }
+            set { is_mysql_open = value; RaisePropertyChanged("is_Mysql_open") ; }
         }
+
+        private string mysql_status;
         public string Mysql_Status
         {
-            get { return LabelModel.mysql_status; }
-            set { LabelModel.mysql_status = value; }
+            get { return mysql_status; }
+            set { mysql_status = value; RaisePropertyChanged("mysql_status"); }
 
 
         }
+        private bool is_sqlite_open;
         public bool Is_Sqlite_open
         {
-            get { return LabelModel.is_sqlite_open; }
-            set { LabelModel.is_sqlite_open = value; }
+            get { return is_sqlite_open; }
+            set { is_sqlite_open = value; RaisePropertyChanged("is_sqlite_open"); }
         }
+
+
+        private string sqlite_status;
         public string Sqlite_Status
         {
-            get { return LabelModel.sqlite_status; }
-            set { LabelModel.sqlite_status = value; }
+            get { return sqlite_status; }
+            set { sqlite_status = value; RaisePropertyChanged("sqlite_status"); }
 
 
         }
     }
 
-    class imaging_search_result
-    {
-
-        public Imaging_search_result Imaging_result { get; set; }
-        public imaging_search_result (string asset)
-        {
-            Imaging_result = new Imaging_search_result();
-            string connStr = "Server=MYSQL5013.Smarterasp.net;Database=db_a094d4_icdb;Uid=a094d4_icdb;Pwd=icdb123!;Pooling=true";
-
-            MySqlConnection conn = new MySqlConnection(connStr);
-            MySqlCommand command = conn.CreateCommand();
-            conn.Open();
-            String cmdText = "SELECT * from production_log where ictags = '" + asset + "'";
-            using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
-            {
-                MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
-
-                while (reader.Read())
-                {
-                    Imaging_result.imaging_search_wcoa = (reader["wcoa"].ToString());
-                    Imaging_result.imaging_search_ocoa = (reader["ocoa"].ToString());
-                    Imaging_result.imaging_search_hdd = (reader["hdd"].ToString());
-                    Imaging_result.imaging_search_ram = (reader["ram"].ToString());
-                    Imaging_result.imaging_search_video = (reader["video_card"].ToString());
-                    Imaging_result.imaging_search_sku = (reader["channel"].ToString());
-                }
-                conn.Close();
-            }
-
-
-
-            }
-        public string img_wcoa {
-
-            get { return Imaging_result.imaging_search_wcoa; }
-            set { Imaging_result.imaging_search_wcoa = value; }
-
-        }
-        public string img_ocoa
-        {
-
-            get { return Imaging_result.imaging_search_ocoa; }
-            set { Imaging_result.imaging_search_ocoa = value; }
-
-        }
-        public string img_video
-        {
-
-            get { return Imaging_result.imaging_search_video; }
-            set { Imaging_result.imaging_search_video = value; }
-
-        }
-        public string img_sku
-        {
-
-            get { return Imaging_result.imaging_search_sku; }
-            set { Imaging_result.imaging_search_sku = value; }
-
-        }
-        public string img_hdd
-        {
-
-            get { return Imaging_result.imaging_search_hdd; }
-            set { Imaging_result.imaging_search_hdd = value; }
-
-        }
-        public string img_ram
-        {
-
-            get { return Imaging_result.imaging_search_ram; }
-            set { Imaging_result.imaging_search_ram = value; }
-
-        }
-    }
-
-
-    public class discovery_result 
-    {
-        public Idbprovider mysql_data = new Mysql_DataProvider();
-        public Idbprovider sqlite_data = new SQlite_DataProvider();
-        public Discovery_result Discovery_result { get; set; }
-        public discovery_result(string asset)
-        {
-            Discovery_result = new Discovery_result();
-           
-            Discovery_result = mysql_data.discovery_data(asset);
-        }
-       
-      
-        public string cpu
-        {
-            get { return Discovery_result.search_cpu; }
-            set { Discovery_result.search_cpu = value; }
-        }
-        public string manu
-        {
-            get { return Discovery_result.search_manu; }
-            set { Discovery_result.search_manu = value; }
-        }
-        public string model
-        {
-            get { return Discovery_result.search_model; }
-            set { Discovery_result.search_model = value; }
-        }
-        public string serial
-        {
-            get { return Discovery_result.search_serial; }
-            set { Discovery_result.search_serial = value; }
-        }
-        public string optical_drive
-        {
-            get { return Discovery_result.search_optical_drive; }
-            set { Discovery_result.search_optical_drive = value; }
-        }
-        public long ram
-        {
-            get { return Discovery_result.search_ram; }
-            set { Discovery_result.search_ram = value; }
-
-        }
-        public long hdd
-        {
-            get { return Discovery_result.search_hdd; }
-            set { Discovery_result.search_hdd = value; }
-        }
    
-        
-    }
+
+
+   
 
 
 
-class search_result
-    {
-        public Search_result Search_result { get; set; }
-        public search_result(string asset)
-        {
-            Search_result = new Search_result();
-            //this is the viewModel for search flyout
-            string connStr = "Server=MYSQL5013.Smarterasp.net;Database=db_a094d4_icdb;Uid=a094d4_icdb;Pwd=icdb123!;Pooling=true";
-
-            MySqlConnection conn = new MySqlConnection(connStr);
-            MySqlCommand command = conn.CreateCommand();
-            conn.Open();
-            String cmdText = "SELECT * from rediscovery where ictag = '" + asset + "'";
-            using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
-            {
-                MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
-                while (reader.Read())
-                {
-                    Search_result.search_cpu = (reader["cpu"].ToString());
-                    Search_result.search_hdd = (long.Parse(reader["hdd"].ToString()));
-                    Search_result.search_manu = (reader["brand"].ToString());
-                    Search_result.search_ram = (long.Parse(reader["ram"].ToString()));
-                    Search_result.search_model = (reader["model"].ToString());
-                    Search_result.search_serial = (reader["serial"].ToString());
-                    Search_result.search_optical_drive = (reader["optical_drive"].ToString());
-                    Search_result.search_sku  = (reader["pallet"].ToString());
-                }
-                conn.Close();
-            }
-        }
-            public string cpu
-        {
-            get { return Search_result.search_cpu; }
-            set { Search_result.search_cpu = value; }
-        }
-        public string manu
-        {
-            get { return Search_result.search_manu; }
-            set { Search_result.search_manu = value; }
-        }
-        public string model
-        {
-            get { return Search_result.search_model; }
-            set { Search_result.search_model = value; }
-        }
-        public string serial
-        {
-            get { return Search_result.search_serial; }
-            set { Search_result.search_serial = value; }
-        }
-        public string optical_drive
-        {
-            get { return Search_result.search_optical_drive; }
-            set { Search_result.search_optical_drive = value; }
-        }
-        public long ram
-        {
-            get { return Search_result.search_ram; }
-            set { Search_result.search_ram = value; }
-
-        }
-        public long hdd
-        {
-            get { return Search_result.search_hdd; }
-            set { Search_result.search_hdd = value; }
-        }
-        public string sku
-        {
-            get { return Search_result.search_sku; }
-            set { Search_result.search_sku = value; }
-        }
-    }
+   
 
 
 }

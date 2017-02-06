@@ -13,6 +13,10 @@ namespace modern_label
 {
     class SQlite_DataProvider : Idbprovider
     {
+        public bool add_channel(string channel_name, string sku)
+        {
+            bool sucesss = false;
+            return sucesss; }
 
         public ObservableCollection<RefrubHistoryObj> db_history()
         {
@@ -33,6 +37,13 @@ namespace modern_label
             return result;
 
 
+        }
+
+        public bool discovery_insert(RefrubHistoryObj obj)
+        {
+            var result = false;
+
+            return result;
         }
 
         public Dictionary<String, int> sku_brand()
@@ -78,7 +89,7 @@ namespace modern_label
             }
             return is_online;
         }
-        public bool insert()
+        public bool insert(RefrubHistoryObj insert)
         {
             bool sucess = false;
 

@@ -30,14 +30,34 @@ namespace modern_label
             }
             set { }
         }
+
+        public class magento_brand
+        {
+            public string name { get; set; }
+            public string dropdown_value { get; set; }
+
+        }
+
         public class grade
         {
             public string value { get; set; }
-            
             public string name { get; set; }
         }
 
+        public class magento_cpu
+        {
+            public string html { get; set; }
+            public string dropdown_value { get; set; }
+        }
+        public class magento_misc
+        {
+            public string software_desc { get; set; }
+            public string ic_certified { get; set; }
+            public string oem_software_desc { get; set; }
+            public string meta_desc { get;set;}
 
+
+        }
         public class magento_ram
         {
             public string name { get; set; }
@@ -95,7 +115,15 @@ namespace modern_label
 
 
            
-        public List<string> db_select { get; set; }
+        public List<string> db_select {
+
+            get {
+              var  temp = new List<string>();
+
+                temp.Add("Online DB");
+                temp.Add("Local DB");
+                return temp;
+            } set { } }
         public bool is_mysql_open { get; set; }
         public string mysql_status { get; set; }
         public bool is_sqlite_open { get; set; }
@@ -106,6 +134,8 @@ namespace modern_label
 
     }
    
+    
+
     public class RefrubHistoryObj
     {
 
@@ -119,7 +149,7 @@ namespace modern_label
         public string made { get; set; }
         public string cpu { get; set; }
         public string serial { get; set; }
-        
+       
         public string channel { get; set; }
         public string selected_printer { get; set; }
         public string type { get; set; }

@@ -16,6 +16,9 @@ namespace modern_label
 
         }
 
+
+     
+
         public void get_exisiting(RefrubHistoryObj spec)
         {
             MagentoService mservice = new MagentoService();
@@ -125,8 +128,8 @@ namespace modern_label
             mservice.catalogInventoryStockItemUpdate(mlogin, spec.sku, qty_update);
         }
 
-       
 
+        Mysql_DataProvider mysql_data = new Mysql_DataProvider();
         public RefrubHistoryObj listing_info(RefrubHistoryObj spec)
         {
             //format magento listing machine accsessories description
@@ -141,7 +144,7 @@ namespace modern_label
             }
 
             //format the meta description on magento listing 
-            spec.meta_desc = "US based nonprofits and low-income individuals can get a great deal on a refurbished laptop right here on the InterConnection Online Store.  This is a Windows 10 machine that has been tested and IC Certified by our in-house technicians.";
+            spec.meta_desc = mysql_data.get_misc("meta_desc");
             //format the listing title 
             string title_cpu = spec.cpu.Replace("Intel(R)", "");
             title_cpu = title_cpu.Replace("(TM)", " ");
@@ -168,12 +171,12 @@ namespace modern_label
                 {
                     spec.short_desc = "Get a great price on a great quality refurbished laptop right here at InterConnection. This laptop comes with a " + spec.cpu + " processor, " + spec.ram + "GB of Memory, " + spec.hdd + "GB Hard Drive, with Windows 10 Pro and Microsoft Office 2010 Home & Business.We back all of our products with a 1 year warranty.";
                 }
-
-                spec.ic_cert = "<div class='row'><div class='col-sm-8'><p><a href='http://interconnection.org/store/iccertified/'><img style='padding-left: 8px;' align='right' alt='IC Certified' src='http://connectall.org/media/wysiwyg/ICCertified.png' /></a>InterConnection (IC) is a leading provider of quality refurbished laptops and computers to nonprofit organizations and low-income individuals in the U.S. and to schools and non-governmental organizations around the world. We have developed a computer refurbishing process that ensures all computers pass a series of refurbishment stages and meet the highest quality control standards. All computers that meet our standards are deemed <a href='http://interconnection.org/store/iccertified/'>&ldquo;IC Certified&rdquo;</a>, which is our symbol for quality and reliability.</p></div></div></div>";
+                
+                spec.ic_cert = mysql_data.get_misc("certified");
 
 
                 spec.software = "Windows 10 Professional & Microsoft Office Home and Business 2010";
-                spec.soft_desc = "<p>Windows 10 Professional, 64 bit</p><p>Microsoft Office 2010 Home and Business with Office, Excel, Word, Outlook and Power Point</p><p><strong>InterConnection exclusive:</strong>&nbsp;all of our computers come with a recovery partition, allowing users to restore the PCs operating system to like-new condition&nbsp;<em>without an installation disk.</em></p>";
+                spec.soft_desc = mysql_data.get_misc("software_desc");
                 spec.pallet = spec.sku;
 
                 if (spec.channel.Contains("OEM"))
@@ -182,7 +185,7 @@ namespace modern_label
                     spec.meta_title = spec.brand + " " + spec.model + " (" + spec.cpu + "," + spec.ram + "," + spec.hdd + ") with Microsoft Windows 10 Professional ";
                     spec.sku = "OEM_" + spec.sku;
                     spec.software = "Windows 10 Professional";
-                    spec.soft_desc = "<p>Windows 10 Professional, 64 bit</p><p><strong>InterConnection exclusive:</strong>&nbsp;all of our computers come with a recovery partition, allowing users to restore the PCs operating system to like-new condition&nbsp;<em>without an installation disk.</em></p>";
+                    spec.soft_desc = mysql_data.get_misc("oem_software_desc");
                 }
                 
             }

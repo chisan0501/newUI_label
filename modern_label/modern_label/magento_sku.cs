@@ -44,7 +44,7 @@ namespace modern_label
         //generate the list of brand with index number for magento filterable attribute
         public static Dictionary<string, int> brand_name()
         {
-            var mysql_data = new Mysql_DataProvider();
+            var mysql_data = new Mysql_DataProvider(LabelViewModel.db_source);
             Dictionary<string, int> brand_name = new Dictionary<string, int>();
             brand_name = mysql_data.sku_brand();
             return brand_name;
@@ -1583,67 +1583,89 @@ namespace modern_label
 
             if (!string.IsNullOrEmpty(s))
             {
+                Mysql_DataProvider mysql_data = new Mysql_DataProvider(LabelViewModel.db_source);
 
                 if (s.Contains("(TM)2 Duo") || s.Contains("Intel(R) Core(TM)2 CPU") || s.Contains("Genuine Intel(R) CPU"))
                 {
-                    spec.cpu_desc = "<div class='container'><div class='row'><div class='col-sm-8'><p><img src='http://connectall.org/media/wysiwyg/Core2Duo.png' style = 'PADDING - LEFT: 8px' align = 'right' alt = 'Core2Duo'>This refurbished computer features an Intel dual core processor. This processor delivers fast performance, great energy efficiency, and responsive multitasking, so you can be more productive.<br><br>Combining mainstream processing speeds with power - saving features, PCs with the Intel Core 2 processor family let you get more done in less time,reducing energy costs by an average of 50 percent.</p><br><hr></div></div>";
+                    
+                    var result = mysql_data.get_cpu("c2d");
                     title = c2d_cpu(s);
-                    spec.cpu_dropdown = "140";
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
                 }
                 else if (s.Contains("2 Quad"))
                 {
-                    spec.cpu_desc = "<div class='container'><div class='row'><div class='col-sm-8'><p><img src='http://connectall.org/media/wysiwyg/Core2Quad.png' style = 'PADDING - LEFT: 8px' align = 'right' alt = 'Core2Quad'>This refurbished computer features an Intel Quad core processor. This processor delivers fast performance, great energy efficiency, and responsive multitasking, so you can be more productive.<br><br>Combining mainstream processing speeds with power - saving features, PCs with the Intel Core 2 processor family let you get more done in less time,reducing energy costs by an average of 50 percent.</p><br><hr></div></div>";
+                    var result = mysql_data.get_cpu("c2q");
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
                     title = c2d_cpu(s);
                     title = title.Replace("c2d", "c2q");
-                    spec.cpu_dropdown = "140";
+                    
                 }
                 else if (s.Contains("Core(TM)2 Extreme"))
                 {
-                    spec.cpu_desc = "<div class='container'><div class='row'><div class='col-sm-8'><p><img src='http://connectall.org/media/wysiwyg/Core2Quad.png' style = 'PADDING - LEFT: 8px' align = 'right' alt = 'Core2Quad'>This refurbished computer features an Intel Core 2 Extreme processor. This processor delivers fast performance, great energy efficiency, and responsive multitasking, so you can be more productive.<br><br>Combining mainstream processing speeds with power - saving features, PCs with the Intel Core 2 processor family let you get more done in less time,reducing energy costs by an average of 50 percent.</p><br><hr></div></div>";
+                    var result = mysql_data.get_cpu("c2q");
                     title = c2d_cpu(s);
                     title = title.Replace("c2d", "c2Extreme");
-                    spec.cpu_dropdown = "140";
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
                 }
 
 
                 else if (s.Contains("i3"))
                 {
-                    spec.cpu_desc = "<div class='container'><div class='row'><div class='col-sm-8'><p><img src='http://connectall.org/media/wysiwyg/i3.png' style = 'PADDING - LEFT: 8px' align = 'right' alt = 'Inteili3'>This refurbished computer features an Intel i3 processor.This processor delivers blindingly-fast performance, and multiple power states to ensure you are never wasting power.<br><br>Combining mainstream processing speeds with power - saving features, PCs with the Intel 3 processor family let you excel in whatever task you are working on in a fraction of the time, while managing energy levels automatically.</p><br><hr></div></div>";
-                    spec.cpu_dropdown = "139";
+                    var result = mysql_data.get_cpu("i3");
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
                     title = i3_cpu(s);
                 }
                 else if (s.Contains("i5"))
                 {
-                    spec.cpu_desc = "<div class='container'><div class='row'><div class='col-sm-8'><p><img src='http://connectall.org/media/wysiwyg/i5.png' style = 'PADDING - LEFT: 8px' align = 'right' alt = 'Inteili5'>This refurbished computer features an Intel i5 processor.This processor delivers blindingly-fast performance, multiple power states to ensure you are never wasting power , and a new platform that boosts graphics, battery life and security.<br><br>Combining mainstream processing speeds with power - saving features, PCs with the Intel i5 processor family let you excel in whatever task you are working on in a fraction of the time, while managing energy levels automatically.</p><br><hr></div></div>";
-                    title = i5_cpu(s);
-                    spec.cpu_dropdown = "138";
+                    var result = mysql_data.get_cpu("i5");
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+                  
+                    title = i5_cpu(s); 
                 }
                 else if (s.Contains("i7"))
                 {
-                    spec.cpu_desc = "<div class='container'><div class='row'><div class='col-sm-8'><p><img src='http://connectall.org/media/wysiwyg/i7.png' style = 'PADDING - LEFT: 8px' align = 'right' alt = 'i7'>This refurbished computer features an Intel i7 processor.This processor delivers blindingly-fast performance, multiple power states to ensure you are never wasting power , and a new platform that boosts graphics, battery life and security.<br><br>Combining mainstream processing speeds with power - saving features, PCs with the Intel i7 processor family let you excel in whatever task you are working on in a fraction of the time, while managing energy levels automatically.</p><br><hr></div></div>";
-                    spec.cpu_dropdown = "137";
+                    var result = mysql_data.get_cpu("i7");
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
                     title = i7_cpu(s);
                 }
                 else if (s.Contains("Pentium(R) Dual-Core"))
                 {
-                    spec.cpu_desc = "<div class='container'><div class='row'><div class='col-sm-8'><p><img src='http://connectall.org/media/wysiwyg/CeleronM.png' style = 'PADDING - LEFT: 8px' align = 'right' alt = 'CeleronM'>This refurbished computer features a Celeron M processor.This processor delivers fast performance and steady processing power so you can remain productive.</p><br><hr></div></div>";
+                    var result = mysql_data.get_cpu("c2d");
+                   
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
                     title = pentium_dual_core(s);
                 }
                 else if (s.Contains("Celeron") || (s.Contains("Intel(R) Pentium(R) M")) || (s.Contains("Core(TM) M")))
                 {
-                    spec.cpu_desc = "<div class='container'><div class='row'><div class='col-sm-8'><p><img src='http://connectall.org/media/wysiwyg/CeleronM.png' style = 'PADDING - LEFT: 8px' align = 'right' alt = 'CeleronM'>This refurbished computer features a Celeron M processor.This processor delivers fast performance and steady processing power so you can remain productive.</p><br><hr></div></div>";
+                    var result = mysql_data.get_cpu("c2d");
+                    
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
                     title = celeron(s);
                 }
                 else if (s.Contains("Xeon"))
                 {
-                    spec.cpu_desc = "<div class='container'><div class='row'><div class='col-sm-8'><p><img src='http://connectall.org/media/wysiwyg/xeon.png' style = 'PADDING - LEFT: 8px' align = 'right' alt = 'Xeon'>This refurbished computer features a Xeon processor.This processor delivers fast performance and steady processing power so you can remain productive.</p><br><hr></div></div>";
+                    var result = mysql_data.get_cpu("xeon");
+                  
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
                     string str = spec.cpu.Substring(spec.cpu.IndexOf('@') + 1);
                     str = str.Replace("GHz", "");
                     title = str + "Xeon";
                 }
                 else if (s.Contains("AMD"))
                 {
-                    spec.cpu_desc = "<div class='container'><div class='row'><div class='col-sm-8'><p><img src='http://connectall.org/media/wysiwyg/amd.png' style = 'PADDING - LEFT: 8px' align = 'right' alt = 'AMD'>This refurbished computer features a AMD processor.This processor delivers fast performance and steady processing power so you can remain productive.</p><br><hr></div></div>";
+                    var result = mysql_data.get_cpu("amd");
+                    
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
 
                     title = "AMD";
                 }
@@ -1713,7 +1735,7 @@ namespace modern_label
                 }
 
             }
-            Mysql_DataProvider mysql = new Mysql_DataProvider();
+            Mysql_DataProvider mysql = new Mysql_DataProvider(LabelViewModel.db_source);
 
            
             
@@ -1766,7 +1788,7 @@ namespace modern_label
                 ram = formatted_ram.ToString();
             }
 
-            Mysql_DataProvider mysql_data = new Mysql_DataProvider();
+            Mysql_DataProvider mysql_data = new Mysql_DataProvider(LabelViewModel.db_source);
             var ram_result = mysql_data.get_ram(spec.ram);
             spec.ram_desc = ram_result.html;
             spec.memory_dropdown = ram_result.drop_down_value;
@@ -1833,22 +1855,22 @@ namespace modern_label
             obj.create_date = DateTime.Today.ToString("MM/dd/yyyy");
             obj.model = obj.model.Trim();
             //apply logic to brand name after string distance function 
-            obj.brand  = brand_parser(obj.made);
+            //obj.brand  = brand_parser(obj.made);
             obj = brand_dropdown(obj);
             obj.model = obj.model.Replace(" ", "_");
             obj.desc = obj.cpu_desc + obj.ram_desc + obj.hdd_desc + obj.ic_cert;
             return obj;
         }
 
-       public static string brand_parser (string brand)
-        {
-            Mysql_DataProvider mysql_data = new Mysql_DataProvider();
-            brand = compute_difference(brand, mysql_data.sku_brand());
+       //public static string brand_parser (string brand)
+       // {
+       //     Mysql_DataProvider mysql_data = new Mysql_DataProvider();
+       //     brand = compute_difference(brand, mysql_data.sku_brand());
             
 
 
-            return brand;
-        }
+       //     return brand;
+       // }
         public static RefrubHistoryObj brand_dropdown (RefrubHistoryObj spec)
         {
             

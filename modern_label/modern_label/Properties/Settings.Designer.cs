@@ -32,5 +32,15 @@ namespace modern_label.Properties {
                 return ((string)(this["modern_label_org_connectall_MagentoService"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://login.salesforce.com/services/Soap/c/38.0/0DF6000000007AN")]
+        public string modern_label_SF_SforceService {
+            get {
+                return ((string)(this["modern_label_SF_SforceService"]));
+            }
+        }
     }
 }

@@ -1,0 +1,73 @@
+﻿<Controls:MetroWindow x:Class="modern_coas.MainWindow"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+                      Title="MainWindow"
+                      Height="650"
+                      Width="825">
+    <Grid>
+        <TabControl>
+            <TabItem Header="Home">
+                <StackPanel Margin="235,116,331,352">
+                    <Label FontSize="25" Content="Select Station" Height="40"></Label>
+                    <ComboBox FontSize="25" ItemsSource="{Binding Station_list}" SelectedItem="{Binding Selected_station}" Height="38"></ComboBox>
+                </StackPanel>
+
+            </TabItem>
+            <TabItem Header="Imaging" IsEnabled="{Binding Tab_enable}">
+                123
+            </TabItem>
+        </TabControl>
+        <StackPanel Margin="148,331,137,80"/>
+       
+        <StatusBar x:Name="status_bar" Margin="0,584,0,0" Grid.Row="2">
+            <StatusBarItem>DataBase Connection
+
+            </StatusBarItem>
+            <StatusBarItem>
+                <Controls:SplitButton x:Name="db_select" SelectedIndex="0"
+    ItemsSource="{Binding DB_select}"  SelectedItem="{Binding Path=Db_select_item,Mode=TwoWay}" />
+            </StatusBarItem>
+            <Separator Style="{StaticResource MetroStatusBarSeparator}"></Separator>
+            <StatusBarItem>
+                <TextBlock Name="mysql_status" Text="{Binding Mysql_Status}">
+
+                </TextBlock>
+
+            </StatusBarItem>
+            <Separator Style="{StaticResource MetroStatusBarSeparator}"></Separator>
+            <StatusBarItem>
+                <TextBlock Name="sqlite_status" Text="{Binding Sqlite_Status}">
+
+                </TextBlock>
+
+            </StatusBarItem>
+            <Separator Style="{StaticResource MetroStatusBarSeparator}"></Separator>
+            <StatusBarItem>
+
+                <TextBlock Name="user_status" Text="{Binding User_status}">
+
+                </TextBlock>
+
+            </StatusBarItem>
+            <Separator Style="{StaticResource MetroStatusBarSeparator}"></Separator>
+            <StatusBarItem>
+              
+                    <Button Content="Sound Test" Style="{DynamicResource SquareButtonStyle}" Click="Button_Click">
+
+                   
+
+
+                </Button>
+                 
+               
+         
+
+
+            </StatusBarItem>
+
+
+        </StatusBar>
+    </Grid>
+
+</Controls:MetroWindow>

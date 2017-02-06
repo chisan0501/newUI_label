@@ -9,8 +9,9 @@ namespace modern_label
 {
     public interface Idbprovider
     {
+        bool discovery_insert(RefrubHistoryObj input);
         bool ping();
-        bool insert();
+        bool insert(RefrubHistoryObj input);
         select_imaging imaging_data();
         user_list users();
         Discovery_result discovery_data(string asset);
@@ -19,5 +20,6 @@ namespace modern_label
         List<string> sku_list(string channel);
         RefrubHistoryObj redisco_data(int asset);
         Dictionary<String, int> sku_brand();
+        bool add_channel(string channel_name, string sku);
     }
 }
