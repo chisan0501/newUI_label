@@ -1,10 +1,12 @@
 ﻿<Controls:MetroWindow x:Class="modern_coas.MainWindow"
                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
                       xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
                       Title="MainWindow"
                       Height="650"
-                      Width="825">
+                      Width="825"
+                        Dialog:DialogParticipation.Register="{Binding}" >
     <Grid>
         <TabControl>
             <TabItem Header="Home">
@@ -15,10 +17,22 @@
 
             </TabItem>
             <TabItem Header="Imaging" IsEnabled="{Binding Tab_enable}">
-                123
+                <StackPanel Margin="33,5,414.667,70.333">
+                    <ComboBox ItemsSource="{Binding Channel_list}" Controls:TextBoxHelper.Watermark="Select Channel" ></ComboBox>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Manage COAs">
+                <StackPanel Margin="26,16,407.667,444.333">
+                    <Label Content="Search COA"></Label>
+                    <TextBox x:Name="search_coa_box" Controls:TextBoxHelper.Watermark="Enter COA ID " Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
+                         Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Search_coa, Mode=TwoWay}"
+                         ToolTip="Search Windows or Office COA here" KeyDown="Pre_COA_KeyDown" MaxLength="17" TextChanged="search_coa_box_TextChanged" ></TextBox>
+                    <TextBox x:Name="coa_result" IsReadOnly="True" Text="{Binding Search_coa_result}"></TextBox>
+                    <Button Command="{Binding Reuse_coa}" Content="Re-Use COA"></Button>
+                </StackPanel>
             </TabItem>
         </TabControl>
-        <StackPanel Margin="148,331,137,80"/>
+    
        
         <StatusBar x:Name="status_bar" Margin="0,584,0,0" Grid.Row="2">
             <StatusBarItem>DataBase Connection

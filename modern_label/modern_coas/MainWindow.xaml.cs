@@ -41,6 +41,37 @@ namespace modern_coas
         {
             SystemSounds.Beep.Play();
         }
+
+        private void Pre_COA_KeyDown(object sender, KeyEventArgs e)
+        {
+            string input = search_coa_box.Text;
+          
+            StringBuilder sb = new StringBuilder();
+            switch(input.Length)
+            {
+                case 5:
+                case 9:
+                case 13:
+                      search_coa_box.Text = search_coa_box.Text + "-";
+                    break;
+                case 17:
+                 //  search_coa_box.Text.Replace("--", "-");
+                    break;
+                   
+            }
+            if(search_coa_box.Text.Length != 0)
+            {
+                search_coa_box.SelectionStart = search_coa_box.Text.Length + 1;
+            }
+       
+
+
+        }
+
+        private void search_coa_box_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
     
 }
