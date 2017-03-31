@@ -28,6 +28,13 @@ namespace modern_label
 
 
         }
+
+        public string Is_SSD
+        {
+            get { return Search_result.is_SSD; }
+            set { Search_result.is_SSD = value; }
+        }
+
         public string cpu
         {
             get { return Search_result.search_cpu; }

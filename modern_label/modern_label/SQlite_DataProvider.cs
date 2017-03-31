@@ -1,13 +1,6 @@
-﻿using MySql.Data.MySqlClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data;
-using System.Data.SQLite;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace modern_label
 {
@@ -79,8 +72,8 @@ namespace modern_label
 
                 
                 
-                var sqlite_connect = new SQLiteConnection("Data source=Z:\\inventory.db3;FailIfMissing=True");
-                sqlite_connect.Open();
+               // var sqlite_connect = new SQLiteConnection("Data source=Z:\\inventory.db3;FailIfMissing=True");
+               // sqlite_connect.Open();
                 is_online = true;
             }
             catch
@@ -107,19 +100,19 @@ namespace modern_label
         {
             List<String> test = new List<string>();
             user_list user_list = new user_list();
-            using (SQLiteConnection connect = new SQLiteConnection("Data source=Z:\\inventory.db3;FailIfMissing=True"))
+         //   using (SQLiteConnection connect = new SQLiteConnection("Data source=Z:\\inventory.db3;FailIfMissing=True"))
             {
-                connect.Open();
-                using (SQLiteCommand fmd = connect.CreateCommand())
+             //   connect.Open();
+           //     using (SQLiteCommand fmd = connect.CreateCommand())
                 {
-                    fmd.CommandText = @"SELECT user_name from users";
-                    fmd.CommandType = CommandType.Text;
-                    SQLiteDataReader r = fmd.ExecuteReader();
-                    while (r.Read())
-                    {
-                        test.Add(Convert.ToString(r["user_name"]));
+                    //fmd.CommandText = @"SELECT user_name from users";
+                    //fmd.CommandType = CommandType.Text;
+                    //SQLiteDataReader r = fmd.ExecuteReader();
+                    //while (r.Read())
+                    //{
+                    //    test.Add(Convert.ToString(r["user_name"]));
 
-                    }
+                    //}
                 }
             }
             user_list.users = test;

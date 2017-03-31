@@ -53,7 +53,8 @@
                     <TextBox Controls:TextBoxHelper.ClearTextButton="True" Text="{Binding Rediscovery_search_sku}" x:Name="search_sku" Controls:TextBoxHelper.Watermark="sku" />
 
                     <Button x:Name="search_edit" Content="Edit"  Command="{Binding search_edit}" Style="{StaticResource AccentedSquareButtonStyle}">
-
+                    </Button>
+                    <Button x:Name="copyTo_discovery_btn"  Command="{Binding copyTo_discovery_btn}" Content="Copy Data to discovery" Style="{StaticResource AccentedSquareButtonStyle}">
                     </Button>
                 </StackPanel>
 
@@ -98,7 +99,7 @@
                     <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Color" />
                 </StackPanel>
             </Button>
-            <TextBox x:Name="search_box"  Text="{Binding Mode=TwoWay,Path=Asset_tag,UpdateSourceTrigger=LostFocus}" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.Watermark="Search Asset" Width="140" KeyDown="search_box_KeyDown"/>
+            <TextBox x:Name="search_box"  Text="{Binding Mode=TwoWay,Path=Asset_tag,UpdateSourceTrigger=Default}"  Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.Watermark="Search Asset" Width="140" KeyDown="search_box_KeyDown"/>
 
             <Button x:Name="setting_btn" Click="setting_btn_Click">
                 <StackPanel Orientation="Horizontal">
@@ -215,14 +216,13 @@
                          Controls:TextBoxHelper.UseFloatingWatermark="True"
                          Controls:TextBoxHelper.IsWaitingForData="True"
                          ToolTip="Enter Asset Tag here" Height="44" Text="{Binding Submit_asset}" KeyDown="Asset_tag_KeyDown" ></TextBox>
-                        <TextBox x:Name="Pre_COA" Controls:TextBoxHelper.Watermark="Scan Pre-COA" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
+                        <TextBox x:Name="Pre_COA" Controls:TextBoxHelper.Watermark="Scan Pre-COA" Controls:TextBoxHelper.UseFloatingWatermark="True"
                          Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Submit_precoa}"
                          ToolTip="Default Pre-COA will be entered if field is left empty" GotFocus="Pre_COA_GotFocus"></TextBox>
-                        <ComboBox x:Name="channel_dropdown" SelectedItem="{Binding Selected_channel, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select Channel" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding channel_list,Mode=TwoWay}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" SelectionChanged="channel_dropdown_SelectionChanged" />
+                        <ComboBox x:Name="channel_dropdown" SelectedItem="{Binding Selected_channel, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select Channel" ItemsSource="{Binding channel_list,Mode=TwoWay}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" SelectionChanged="channel_dropdown_SelectionChanged" />
                         <ComboBox x:Name="sku_dropdown"  SelectedItem="{Binding Selected_sku, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select SKU" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Path=Sku_list,Mode=TwoWay}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" />
-                        <ComboBox x:Name="grade_dropdown" DisplayMemberPath="name" SelectedValuePath="value" SelectedValue="{Binding grade_Selected_value, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select Grade" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Grade_list}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" Loaded="grade_dropdown_Loaded" />
+                        <ComboBox x:Name="grade_dropdown" IsEnabled="{Binding Enable_grade}" DisplayMemberPath="name" SelectedValuePath="value" SelectedValue="{Binding grade_Selected_value, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select Grade" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Grade_list}" SelectedIndex="{Binding Grade_index}" Controls:TextBoxHelper.UseFloatingWatermark="True" Loaded="grade_dropdown_Loaded" />
 
-                        <Controls:ToggleSwitch IsChecked="{Binding Copy_discovery}" Header="Copy Data to Discovery" Margin="0,0" />
                         <ComboBox x:Name="printer_dropdown"  SelectedItem="{Binding Selected_printer, Mode=TwoWay,ValidatesOnDataErrors=True}"  Controls:TextBoxHelper.Watermark="Select Printer" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Printer_list}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" />
 
                         <Grid Margin="0,15">
@@ -240,7 +240,7 @@
                             <Button Command="{Binding Print}" Width="60"
                         Height="60"
                         IsEnabled="{Binding Printer_enable}"
-                        Style="{DynamicResource MetroCircleButtonStyle}" Margin="94,0,32.667,0">
+                        Style="{DynamicResource MetroCircleButtonStyle}" Margin="94,0,32.667,0" Click="Button_Click_2">
                                 <Rectangle Width="35"
                                Height="35"
                                Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
@@ -274,9 +274,13 @@
                         <TextBox x:Name="Serial" Controls:TextBoxHelper.Watermark="Serial" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
                          Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Label_serial,Mode=TwoWay}"
                          ></TextBox>
+                        <TextBox x:Name="SSD" Controls:TextBoxHelper.Watermark="Has SSD?" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
+                         Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Label_Is_SSD,Mode=TwoWay}"
+                         ></TextBox>
                         <TextBox x:Name="SKU" Controls:TextBoxHelper.Watermark="SKU" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
                          Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Label_sku,Mode=TwoWay}"
                          ></TextBox>
+                        
                         <Image x:Name="preview_image" Source="{Binding Preview}" Margin="0,10" Height="240"/>
                     </StackPanel>
 
@@ -292,11 +296,13 @@
             </TabItem>
             <TabItem Header="RMA">
                 <Grid>
-                    <StackPanel Margin="238,20,209,523">
+                    <StackPanel Margin="200,20,59,526">
                         <Grid>
-                            <TextBox x:Name="search_rma_box" Controls:TextBoxHelper.Watermark="Enter Asset Tag" Text="{Binding Rma_asset}" KeyDown="TextBox_KeyDown" Margin="0,0,189,0"/>
-                            <Label Margin="154,-2,161,2">or</Label>
-                            <TextBox x:Name="serial_search_rma_box" Controls:TextBoxHelper.Watermark="Enter Serial #" Text="{Binding Rma_serial_search}"  Margin="179,0,13,0" KeyDown="serial_search_rma_box_KeyDown"/>
+                            <TextBox x:Name="search_rma_box" Controls:TextBoxHelper.Watermark="Enter Asset Tag" Text="{Binding Rma_asset}" KeyDown="TextBox_KeyDown" Margin="0,0,415,0"/>
+                            <Label Margin="120,0,382,0">or</Label>
+                            <TextBox x:Name="serial_search_rma_box" Controls:TextBoxHelper.Watermark="Enter Serial #" Text="{Binding Rma_serial_search}"  Margin="153,0,283,0" KeyDown="serial_search_rma_box_KeyDown"/>
+                            <Label Margin="256,0,246,0">or</Label>
+                            <TextBox x:Name="rmaNum_search_rma_box" Controls:TextBoxHelper.Watermark="Enter RMA #" Text="{Binding Rma_rma_search}"  Margin="284,0,152,0" KeyDown="rma_search_rma_box_KeyDown"/>
 
                         </Grid>
 
@@ -411,6 +417,7 @@
 
             </StatusBarItem>
             <Separator Style="{StaticResource MetroStatusBarSeparator}"></Separator>
+          
             <StatusBarItem>
 
 

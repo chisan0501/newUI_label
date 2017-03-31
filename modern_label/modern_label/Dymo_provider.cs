@@ -21,7 +21,7 @@ namespace modern_label
 
         public BitmapImage generate_preview (ILabel label)
         {
-            
+                
                 string path = Directory.GetCurrentDirectory();
                 ILabelRenderParams renderParams = new LabelRenderParams();
 
@@ -38,6 +38,7 @@ namespace modern_label
                 // bitmap.UriSource = new Uri(path + @"\\preview.png");
                 bitmap.EndInit();
                 bitmap.Freeze();
+            
                 return bitmap;
             
          
@@ -49,12 +50,19 @@ namespace modern_label
         public ILabel generate_label (RefrubHistoryObj spec)
         {
             string path = Directory.GetCurrentDirectory();
-            var label = DYMO.Label.Framework.Label.Open(path + @"\\source.label");
+            
+            var label = Label.Open(path + "\\source.label");
             label.SetObjectText("cpu", spec.cpu);
             label.SetObjectText("asset_tag", spec.asset_tag.ToString());
             label.SetObjectText("manu", spec.model);
+            if(spec.is_ssd == "True") {
+                label.SetObjectText("hdd", spec.hdd + "GB SSD");
+            }else
+            {
+                label.SetObjectText("hdd", spec.hdd + "GB");
+            }
             label.SetObjectText("ram", spec.ram + "GB");
-            label.SetObjectText("hdd", spec.hdd + "GB");
+            
             label.SetObjectText("time", DateTime.Now.ToString());
             label.SetObjectText("refur", spec.refurbisher);
             label.SetObjectText("BARCODE", spec.sku);

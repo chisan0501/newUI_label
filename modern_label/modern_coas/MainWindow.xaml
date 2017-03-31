@@ -6,23 +6,127 @@
                       Title="MainWindow"
                       Height="650"
                       Width="825"
+                      ResizeMode="NoResize"
+                    WindowStartupLocation="CenterScreen"
                         Dialog:DialogParticipation.Register="{Binding}" >
     <Grid>
         <TabControl>
             <TabItem Header="Home">
-                <StackPanel Margin="235,116,331,352">
-                    <Label FontSize="25" Content="Select Station" Height="40"></Label>
-                    <ComboBox FontSize="25" ItemsSource="{Binding Station_list}" SelectedItem="{Binding Selected_station}" Height="38"></ComboBox>
-                </StackPanel>
+                <Grid>
+                    <StackPanel Margin="235,116,331,370">
+                        <Label FontSize="25" Content="Select Station*" Height="40"></Label>
+                        <ComboBox FontSize="25" ItemsSource="{Binding Station_list}" SelectedItem="{Binding Selected_station}" Height="38"></ComboBox>
+                    </StackPanel>
+                    <StackPanel Margin="186,248,245,135">
+                        <Label Content="Missing Drivers :"></Label>
+                        <TextBox x:Name="status" Text="{Binding Driver_status}"  TextWrapping="Wrap" AcceptsReturn="True" Height="80" VerticalScrollBarVisibility="Auto"></TextBox>
+                        <Label Content="Mapped Drives :"></Label>
+                        <TextBox x:Name="network_drive" Text="{Binding Network_Driver_status}"  TextWrapping="Wrap" AcceptsReturn="True" Height="61" VerticalScrollBarVisibility="Auto"></TextBox>
+
+                    </StackPanel>
+                </Grid>
+             
+            </TabItem>
+
+            <TabItem Header="MAR" IsEnabled="{Binding Tab_enable}" Margin="0,-1,0,1">
+                <Grid>
+                    <StackPanel Margin="242,21,184,507" Orientation="Horizontal">
+                        <ComboBox FontSize="30" ItemsSource="{Binding Channel_list}" SelectedValuePath="Value" DisplayMemberPath="Key" SelectedValue="{Binding Path= Selected_channel}"  Controls:TextBoxHelper.Watermark="Select Channel" Height="47" />
+                        
+                    </StackPanel>
+                    <StackPanel Margin="570,101,79,422">
+                        <Button Command="{Binding Reuse_command}" Content="Reuse the Current COAs" Height="21" Margin="0,12"/>
+                    </StackPanel>
+                    <StackPanel Margin="42,87,43,93">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Asset Tag" Width="79"/>
+                            <Label Content="Refurbish Assigned SKU: "/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox IsReadOnly="True" Text="{Binding Asset_assign}"  Width="79"/>
+                            <TextBox IsReadOnly="True" Text="{Binding SKU_assigned}"  Width="359"/>
+                        </StackPanel>
+
+                        <Label Content="Windows COA :"></Label>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox IsReadOnly="True" Text="{Binding Wcoa_id}" Width="203" RenderTransformOrigin="0.5,0.5" >
+                                <TextBox.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform/>
+                                        <SkewTransform/>
+                                        <RotateTransform Angle="0.004"/>
+                                        <TranslateTransform/>
+                                    </TransformGroup>
+                                </TextBox.RenderTransform>
+                            </TextBox>
+                            <TextBox FontSize="12" IsReadOnly="True" Text="{Binding Wcoa}" Width="477"/>
+                            <TextBox IsReadOnly="True" Text="{Binding Wcoa_num}" Width="45"></TextBox>
+                        </StackPanel>
+                        <Label Content="Office COA :"></Label>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox IsReadOnly="True" Text="{Binding Ocoa_id}" Width="204" RenderTransformOrigin="0.5,0.5" >
+                                <TextBox.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform/>
+                                        <SkewTransform/>
+                                        <RotateTransform Angle="0.004"/>
+                                        <TranslateTransform/>
+                                    </TransformGroup>
+                                </TextBox.RenderTransform>
+                            </TextBox>
+                            <TextBox Text="{Binding Ocoa}" Width="477"/>
+                            <TextBox Text="{Binding Ocoa_num}" Width="45"></TextBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Height="232">
+                            <StackPanel Orientation="Vertical" Width="352">
+                                <Label Content="Next 5 Windows COA"></Label>
+                                <ListBox ItemsSource="{Binding Next_wcoa}"></ListBox>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Vertical" Width="374">
+                                <Label Content="Next 5 Office COA"></Label>
+                                <ListBox ItemsSource="{Binding Next_ocoa}"></ListBox>
+                            </StackPanel>
+
+                        </StackPanel>
+
+                    </StackPanel>
+                    <StackPanel Margin="333,481,311,42">
+                        <Button Command="{Binding Activate_mar}" IsEnabled="{Binding Mar_enable}" Content="Activate" Height="47"/>
+                    </StackPanel>
+                </Grid>
 
             </TabItem>
-            <TabItem Header="Imaging" IsEnabled="{Binding Tab_enable}">
-                <StackPanel Margin="33,5,414.667,70.333">
-                    <ComboBox ItemsSource="{Binding Channel_list}" Controls:TextBoxHelper.Watermark="Select Channel" ></ComboBox>
+
+            <TabItem Header="OEM" IsEnabled="{Binding Tab_enable}">
+                <StackPanel Margin="198,172,236,322">
+                    <Label Content="Scan OEM COA-ID"></Label>
+                    <TextBox x:Name="oem_coa_box" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
+                         Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Oem_coa}"
+                         ToolTip="" KeyDown="OEM_keydown" MaxLength="29" TextChanged="search_coa_box_TextChanged" />
+
+                    <Button Command="{Binding Activate_oem}" Content="Start"></Button>
                 </StackPanel>
+
+
+            </TabItem>
+            <TabItem Header="Enter COA" IsEnabled="{Binding Tab_enable}">
+                <Grid>
+                    <StackPanel Margin="231,132,264,310">
+                        <Label Content="Enter Windows COA" Height="33" Margin="0,0,10,0"/>
+                        <TextBox Name="enter_wcoa" Text="{Binding Enter_wcoa}" KeyDown="enter_wcoa_KeyDown" MaxLength="29"></TextBox>
+                        <Label Content="Enter Office COA" Height="33" Margin="0,0,10,0"/>
+                        <TextBox Name="enter_ocoa" Text="{Binding Enter_ocoa}" KeyDown="enter_ocoa_KeyDown" MaxLength="29"></TextBox>
+                    </StackPanel>
+                    <StackPanel Margin="299,283,351,262">
+                        <Button Command="{Binding Enter_coa}" x:Name="manual_activate_btn" Content="Activate"></Button>
+                    </StackPanel>
+                </Grid>
+
+
             </TabItem>
             <TabItem Header="Manage COAs">
-                <StackPanel Margin="26,16,407.667,444.333">
+                <StackPanel Margin="207,165,227,295">
                     <Label Content="Search COA"></Label>
                     <TextBox x:Name="search_coa_box" Controls:TextBoxHelper.Watermark="Enter COA ID " Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
                          Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Search_coa, Mode=TwoWay}"
@@ -31,9 +135,10 @@
                     <Button Command="{Binding Reuse_coa}" Content="Re-Use COA"></Button>
                 </StackPanel>
             </TabItem>
+
         </TabControl>
-    
-       
+
+
         <StatusBar x:Name="status_bar" Margin="0,584,0,0" Grid.Row="2">
             <StatusBarItem>DataBase Connection
 
@@ -66,16 +171,16 @@
             </StatusBarItem>
             <Separator Style="{StaticResource MetroStatusBarSeparator}"></Separator>
             <StatusBarItem>
-              
-                    <Button Content="Sound Test" Style="{DynamicResource SquareButtonStyle}" Click="Button_Click">
 
-                   
+                <Button Content="Sound Test" Style="{DynamicResource SquareButtonStyle}" Click="Button_Click">
+
+
 
 
                 </Button>
-                 
-               
-         
+
+
+
 
 
             </StatusBarItem>

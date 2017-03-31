@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Computer Barcode="22501">
+	<components name='Monitor'>
+		<component name='Manufacturer'>null</component>
+		<component name='Model'>DELL 1907FP</component>
+		<component name='Size'>19.1</component>
+		<component name='MBSerialNumber'>seriall</component>
+		<component name='Resolution'>900 x 1600</component>
+	</components>
+	
+</Computer>
+

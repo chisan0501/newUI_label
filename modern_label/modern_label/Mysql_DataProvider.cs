@@ -12,6 +12,7 @@ namespace modern_label
 {
     class Mysql_DataProvider 
     {
+       
         public static MySqlConnection conn; 
 
         public Mysql_DataProvider(string source)
@@ -42,7 +43,29 @@ namespace modern_label
             }
         }
 
+        public bool copy_discovery_data(string cpu, string model, string manu, string ram, string hdd, string serial, string asset_tag)
+        {
+            bool result = false;
 
+            try
+            {
+
+                MySqlCommand command = conn.CreateCommand();
+                command.CommandText = "insert into discovery (cpu ,hdd,ram,brand,model,serial,ictag) values ('" + cpu + "','" + hdd + "','" + ram + "','" + manu + "','" + model + "','" + serial + "','" + asset_tag + "')";
+                conn.Open();
+                command.ExecuteNonQuery();
+                conn.Close();
+                result = true;
+
+            }
+            catch
+            {
+                result = false;
+            }
+
+            return result;
+
+        }
         public bool copy_rediscovery_data (string cpu,string model, string manu, string ram, string hdd,string serial,string asset_tag)
         {
             bool result = false;
@@ -114,7 +137,7 @@ namespace modern_label
         {
             var img_result = new imaging_search_result();
           
-            MySqlCommand command = conn.CreateCommand();
+            
             conn.Open();
             String cmdText = "SELECT * from production_log where ictags = '" + asset + "'";
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
@@ -129,6 +152,7 @@ namespace modern_label
                     img_result.img_ram = (reader["ram"].ToString());
                     img_result.img_video = (reader["video_card"].ToString());
                     img_result.img_sku = (reader["channel"].ToString());
+                    
                 }
                 conn.Close();
             }
@@ -142,7 +166,7 @@ namespace modern_label
            
 
             
-            MySqlCommand command = conn.CreateCommand();
+            
             conn.Open();
             String cmdText = "SELECT * from rediscovery where ictag = '" + asset + "'";
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
@@ -154,7 +178,7 @@ namespace modern_label
                     var temp_hdd = (reader["hdd"].ToString());
                     Regex digitsOnly = new Regex(@"[^\d]");
                     temp_hdd = digitsOnly.Replace(temp_hdd, "");
-
+                    Search_result.is_SSD = (reader["has_SSD"].ToString());
                     Search_result.search_hdd = (long.Parse(temp_hdd));
                     Search_result.search_manu = (reader["brand"].ToString());
                     var temp_ram = reader["ram"].ToString();
@@ -176,7 +200,7 @@ namespace modern_label
 
           
        
-            MySqlCommand command = conn.CreateCommand();
+           
             conn.Open();
             String cmdText = "SELECT * from discovery where ictag = '" + asset + "'";
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
@@ -247,6 +271,12 @@ namespace modern_label
             return is_connect; 
         }
 
+
+
+        
+
+       
+
         public Dictionary<String,int> sku_brand()
          {
             var result = new Dictionary<string, int>();
@@ -279,6 +309,8 @@ namespace modern_label
             return result;
         }
 
+        
+
         public RefrubHistoryObj redisco_data (int asset )
         {
 
@@ -288,7 +320,7 @@ namespace modern_label
             //   LabelModel.status = "Connection Successful";
             String cmdText = "select * from rediscovery where ictag ='"+asset+"'";
          
-            MySqlCommand command = conn.CreateCommand();
+           
 
             conn.Open();
 
@@ -297,7 +329,7 @@ namespace modern_label
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
-                 result =   new RefrubHistoryObj() { asset_tag = int.Parse(reader["ictag"].ToString()), time = DateTime.Parse(reader["time"].ToString()), refurbisher = (reader["refurbisher"].ToString()), sku = (reader["pallet"].ToString()), hdd = (reader["hdd"].ToString()), ram = (reader["ram"].ToString()),cpu = (reader["cpu"].ToString()), made =(reader["brand"].ToString()),model = (reader["model"].ToString()),serial = (reader["serial"].ToString()),optical_drive = (reader["optical_drive"].ToString()) };
+                 result =   new RefrubHistoryObj() { asset_tag = int.Parse(reader["ictag"].ToString()), time = DateTime.Parse(reader["time"].ToString()), refurbisher = (reader["refurbisher"].ToString()), sku = (reader["pallet"].ToString()), hdd = (reader["hdd"].ToString()), ram = (reader["ram"].ToString()),cpu = (reader["cpu"].ToString()), made =(reader["brand"].ToString()),model = (reader["model"].ToString()),serial = (reader["serial"].ToString()),optical_drive = (reader["optical_drive"].ToString()),is_ssd= (reader["has_SSD"].ToString()) };
                     
                 }
                 conn.Close();
@@ -349,7 +381,7 @@ namespace modern_label
             try
             {
               
-                MySqlCommand command = conn.CreateCommand();
+                
                 conn.Open();
                 String cmdText = "Insert into rediscovery(ictag,time,serial,brand,model,cpu,hdd,ram,optical_drive,location,pallet,pre_coa,refurbisher)VALUES ('" + input.asset_tag + "','" + "" + "','" + input.serial + "','" + input.brand + "','" + input.model + "','" + input.cpu + "','" + input.hdd + "','" + input.ram + "','','" + input.channel + "','" + input.sku + "','" + input.pre_coa + "','" + input.refurbisher + "') on Duplicate KEY update hdd='" + input.hdd + "',ram='" + input.ram + "',location='" + input.channel + "',pallet='" + input.sku + "',pre_coa = '" + input.pre_coa + "',refurbisher = '" + input.refurbisher + "'";
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
@@ -359,6 +391,7 @@ namespace modern_label
                     conn.Close();
                     
                 }
+
                 sucess = true;
             }
             catch

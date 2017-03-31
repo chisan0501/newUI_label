@@ -1562,6 +1562,106 @@ namespace modern_label
             return title;
         }
 
+        public static string ngo_title (RefrubHistoryObj spec)
+        {
+            string title = "";
+            string s = spec.cpu;
+            if (!string.IsNullOrEmpty(s))
+            {
+                Mysql_DataProvider mysql_data = new Mysql_DataProvider(LabelViewModel.db_source);
+
+                if (s.Contains("(TM)2 Duo") || s.Contains("Intel(R) Core(TM)2 CPU") || s.Contains("Genuine Intel(R) CPU"))
+                {
+
+                    var result = mysql_data.get_cpu("c2d");
+                    title = "c2d";
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+                }
+                else if (s.Contains("2 Quad"))
+                {
+                    var result = mysql_data.get_cpu("c2q");
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+
+                    title = "c2q";
+
+                }
+                else if (s.Contains("Core(TM)2 Extreme"))
+                {
+                    var result = mysql_data.get_cpu("c2q");
+
+                    title = "c2Extreme";
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+                }
+
+
+                else if (s.Contains("i3"))
+                {
+                    var result = mysql_data.get_cpu("i3");
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+                    title = "i3";
+                }
+                else if (s.Contains("i5"))
+                {
+                    var result = mysql_data.get_cpu("i5");
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+
+                    title = "i5";
+                }
+                else if (s.Contains("i7"))
+                {
+                    var result = mysql_data.get_cpu("i7");
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+                    title = "i7";
+                }
+                else if (s.Contains("Pentium(R) Dual-Core"))
+                {
+                    var result = mysql_data.get_cpu("c2d");
+
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+                    title = pentium_dual_core(s);
+                }
+                else if (s.Contains("Celeron") || (s.Contains("Intel(R) Pentium(R) M")) || (s.Contains("Core(TM) M")))
+                {
+                    var result = mysql_data.get_cpu("c2d");
+
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+                    title = celeron(s);
+                }
+                else if (s.Contains("Xeon"))
+                {
+                    var result = mysql_data.get_cpu("xeon");
+
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+                    string str = spec.cpu.Substring(spec.cpu.IndexOf('@') + 1);
+                    str = str.Replace("GHz", "");
+                    title = str + "Xeon";
+                }
+                else if (s.Contains("AMD"))
+                {
+                    var result = mysql_data.get_cpu("amd");
+
+                    spec.cpu_desc = result.html;
+                    spec.cpu_dropdown = result.dropdown_value;
+
+                    title = "AMD";
+                }
+                else
+                {
+                    spec.cpu_desc = "";
+                }
+            }
+
+            return title;
+        }
         public static string comput_title(RefrubHistoryObj spec )
         {
 
@@ -1713,7 +1813,7 @@ namespace modern_label
                 {
                     if (IsMagento == false)
                     {
-                        formatted_hdd = Convert.ToInt32(formatted_hdd * 1.024 * 1.024);
+                       
                     }
                     formatted_hdd = Round(formatted_hdd, 10);
                     switch (formatted_hdd)

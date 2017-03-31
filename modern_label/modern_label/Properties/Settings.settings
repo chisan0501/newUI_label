@@ -6,7 +6,7 @@
       <Value Profile="(Default)">https://connectall.org/index.php/api/v2_soap/index/</Value>
     </Setting>
     <Setting Name="modern_label_SF_SforceService" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">https://login.salesforce.com/services/Soap/c/38.0/0DF6000000007AN</Value>
+      <Value Profile="(Default)">https://login.salesforce.com/services/Soap/c/39.0/0DF6000000007AX</Value>
     </Setting>
   </Settings>
 </SettingsFile>

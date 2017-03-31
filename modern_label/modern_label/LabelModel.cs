@@ -138,7 +138,7 @@ namespace modern_label
 
     public class RefrubHistoryObj
     {
-
+        public string is_ssd { get; set; }
         public int asset_tag { get; set; }
         public DateTime time { get; set; }
         public string refurbisher { get; set; }
@@ -222,6 +222,7 @@ namespace modern_label
 
     class Search_result
     {
+        public string is_SSD { get; set; }
         public string search_cpu { get; set; }
         public string search_manu { get; set; }
         public long search_ram { get; set; }

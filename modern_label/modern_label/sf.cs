@@ -98,7 +98,8 @@ namespace modern_label
                 sfdcBinding.SessionHeaderValue.sessionId = currentLoginResult.sessionId;
                 var update_case = new Case();
 
-
+                update_case.Reviewed_by_Production__cSpecified = true;
+                update_case.Reviewed_by_Production__c = true;
                 update_case.Id = id;
                 update_case.Production_Findings__c = finding;
 
@@ -135,14 +136,16 @@ namespace modern_label
 
         }
 
-        public rma_result get_rma_serial(string serial)
+        public rma_result get_rma_num(string num)
         {
             var rma_result = new rma_result();
+
             MySqlCommand command = conn.CreateCommand();
-            conn.Open();
-            String cmdText = "SELECT * from rma where serial = '" + serial + "' limit 1";
+          
+            String cmdText = "SELECT * from rma where rma_number = '" + num + "' limit 1";
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -155,7 +158,34 @@ namespace modern_label
                     rma_result.serial = (reader["serial"].ToString());
                     rma_result.id = (reader["id"].ToString());
                 }
-                conn.Close();
+                
+            }
+            return rma_result;
+
+        }
+
+        public rma_result get_rma_serial(string serial)
+        {
+            var rma_result = new rma_result();
+            MySqlCommand command = conn.CreateCommand();
+            
+            String cmdText = "SELECT * from rma where serial = '" + serial + "' limit 1";
+            using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
+            {
+                conn.Open();
+                MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
+                while (reader.Read())
+                {
+                    rma_result.channel = (reader["channel"].ToString());
+                    rma_result.asset_tag = (reader["ictag"].ToString());
+                    rma_result.date_request = DateTime.Parse(reader["date_requested"].ToString());
+                    rma_result.production_finding = (reader["production_finding"].ToString());
+                    rma_result.rma_description = (reader["description"].ToString());
+                    rma_result.rma_number = (reader["rma_number"].ToString());
+                    rma_result.serial = (reader["serial"].ToString());
+                    rma_result.id = (reader["id"].ToString());
+                }
+              
             }
             return rma_result;
 
@@ -165,10 +195,11 @@ namespace modern_label
         {
             var rma_result = new rma_result();
             MySqlCommand command = conn.CreateCommand();
-            conn.Open();
+          
             String cmdText = "SELECT * from rma where ictag = '" + asset_tag + "' limit 1";
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {

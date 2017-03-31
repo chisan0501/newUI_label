@@ -1,22 +1,12 @@
 ﻿using MahApps.Metro;
 using MahApps.Metro.Controls;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using MySql.Data.MySqlClient;
 using MahApps.Metro.Controls.Dialogs;
-using System.Configuration;
+using System.Diagnostics;
 
 namespace modern_label
 {
@@ -33,6 +23,7 @@ namespace modern_label
         //public Idbprovider sqlite_data = new SQlite_DataProvider();
         public MainWindow()
         {
+           
 
             Tuple<AppTheme, Accent> appStyle = ThemeManager.DetectAppStyle(Application.Current);
             ThemeManager.ChangeAppStyle(Application.Current,
@@ -88,10 +79,11 @@ namespace modern_label
             {
                if (e.Key == Key.Enter)
                 {
-
+                    
                    discovery_result.IsOpen = true;
-                    search_result.IsOpen = true;     
-               }
+                    search_result.IsOpen = true;
+                    search_box.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                }
             }
             catch
             {
@@ -177,6 +169,9 @@ namespace modern_label
             {
                 switch (channel_dropdown.SelectedItem.ToString())
                 {
+                    case "City Of Seattle (Desktop)":
+                    case "City Of Seattle (Laptop)":
+                    case "NGO":
                     case "OEM (Laptop)":
                     case "OEM (Desktop)":
                     case "Mar (Desktop)":
@@ -224,7 +219,7 @@ namespace modern_label
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             Rma_comment_box.Text = "";
-            
+            rmaNum_search_rma_box.Text = "";
             search_rma_box.Text = "";
 
         }
@@ -246,6 +241,15 @@ namespace modern_label
             accentThemeTestWindow.Show();
         }
 
+        private void rma_search_rma_box_KeyDown(object sender, KeyEventArgs g)
+        {
+            if (g.Key == Key.Enter)
+            {
+                var request = new TraversalRequest(FocusNavigationDirection.Next);
+                request.Wrapped = true;
+                rmaNum_search_rma_box.MoveFocus(request);
+            }
+        }
         private void serial_search_rma_box_KeyDown(object sender, KeyEventArgs f)
         {
             if (f.Key == Key.Enter)
@@ -254,6 +258,18 @@ namespace modern_label
                 request.Wrapped = true;
                 serial_search_rma_box.MoveFocus(request);
             }
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+
+            Asset_tag.Focus();
+            Asset_tag.Clear();
+        }
+
+        private void search_box_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+
         }
     }
     

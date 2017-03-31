@@ -1,7 +1,9 @@
 ﻿using modern_label.org.connectall;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,6 +36,30 @@ namespace modern_label
 
         }
 
+        public int update_qty(string sku, string qty, string pid)
+        {
+            MagentoService mservice = new MagentoService();
+            String mlogin = mservice.login("admin", "Interconnection123!");
+            var item_to_update = new catalogInventoryStockItemUpdateEntity();
+            item_to_update.qty = qty;
+            var result = mservice.catalogInventoryStockItemUpdate(mlogin, sku, item_to_update);
+
+            try
+            {
+                HttpWebRequest myHttpWebRequest = (HttpWebRequest)WebRequest.Create("http://dev.interconnection.org/update.php?product_id=" + pid + "&qty=" + qty);
+                myHttpWebRequest.ContentType = "application/x-www-form-urlencoded";
+                myHttpWebRequest.UserAgent = ".NET Framework Test Client";
+                WebResponse wr = myHttpWebRequest.GetResponse();
+            }
+            catch (WebException wex)
+            {
+                var pageContent = new StreamReader(wex.Response.GetResponseStream())
+                                      .ReadToEnd();
+            }
+
+            return result;
+        }
+
         public void create_listing (RefrubHistoryObj spec)
         {
             MagentoService mservice = new MagentoService();
@@ -52,7 +78,14 @@ namespace modern_label
             create.status = "2"; //set to disable
 
             create.visibility = "4"; //set to not Search, Catalog
-            create.weight = "8.0";
+            if (spec.sku.Contains("_DK")){
+                create.weight = "35.0";
+            }else
+            {
+                create.weight = "9.0";
+            }
+
+            
             create.website_ids = website_id; //currently set to 1 (main website)
             create.tax_class_id = "2";
             // create.name = spec.brand + " " + spec.model + " (" + spec.cpu + "," + spec.ram + "GB RAM," + spec.hdd + " GB HDD)";
