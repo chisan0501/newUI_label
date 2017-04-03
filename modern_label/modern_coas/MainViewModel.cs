@@ -78,11 +78,11 @@ namespace modern_coas
 
             mysql_data.report(obj_onload, Oem_coa, "", Selected_station);
             scripts.gen_backup();
-            scripts.gen_config(Oem_coa, "");
+            scripts.gen_oem_config(wcoa);
             cleanup();
         }
 
-        public void cleanup()
+        public void cleanup()   
         {
             File.Delete("C:\\Windows\\IC\\config.bat");
             

@@ -92,6 +92,17 @@ namespace modern_coas
 
         }
 
+        public static void gen_oem_config (string wcoa)
+        {
+            string script_content = Mysql_Data.get_script("oem_config.bat");
+           
+            string path = "C:\\Windows\\IC\\config.bat";
+            StreamWriter batwriter = new StreamWriter(path);
+            batwriter.WriteLine(script_content);
+            batwriter.Close();
+            Process.Start(path).WaitForExit();
+        }
+
         public static void gen_config (string wcoa, string ocoa)
         {
           
