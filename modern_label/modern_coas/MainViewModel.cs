@@ -113,14 +113,17 @@ namespace modern_coas
 
         public async void beta_command_action()
         {
-            StreamWriter w = new StreamWriter(@"W:\windows\IC\activate.bat");
-            w.WriteLine("cscript C:\\Windows\\System32\\slmgr.vbs /ipk " + Wcoa);
-            w.WriteLine("cscript slmgr /ato");
-            w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /inpkey:" + Ocoa);
-            w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /act");
-            w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /dstatus");
-           
-            w.Close();
+
+            var script = Mysql_Data.get_script("activate.bat");
+            script = script.Replace("Wcoa", Wcoa);
+            script = script.Replace("Ocoa", Ocoa);
+            System.IO.File.WriteAllText(@"D:\windows\IC\activate.bat", script);
+            //w.WriteLine("cscript \"C:\\Windows\\System32\\slmgr.vbs\" /ipk " + Wcoa);
+            //w.WriteLine("cscript \"C:\\Windows\\System32\\slmgr.vbs\" /ato");
+            //w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /inpkey:" + Ocoa);
+            //w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /act");
+            //w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /dstatus");
+
 
             XmlDocument doc = new XmlDocument();
 
