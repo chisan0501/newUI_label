@@ -179,6 +179,8 @@ namespace modern_coas
                 enter_ocoa.SelectionStart = enter_ocoa.Text.Length + 1;
             }
         }
+
+       
     }
     
 }

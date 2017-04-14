@@ -1815,7 +1815,7 @@ namespace modern_label
                     {
                        
                     }
-                    formatted_hdd = Round(formatted_hdd, 10);
+                    //formatted_hdd = Round(formatted_hdd, 10);
                     switch (formatted_hdd)
                     {
 

@@ -1,0 +1,15 @@
+﻿<Window x:Class="Offline_coa.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Offline_coa"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid Background="Azure" DataContext="{Binding Offline}">
+        <TextBlock Text="Wcoa" HorizontalAlignment="Right" Margin="0,10,114,280" Width="243"/>
+        <TextBlock Text="{Binding Wcoa}" HorizontalAlignment="Left" Margin="117,167,0,104" Width="242"/>
+        <TextBlock Text="Ocoa" HorizontalAlignment="Right" Margin="0,10,442,157"/>
+        <TextBlock Text="{Binding Ocoa}" HorizontalAlignment="Left" Margin="124,64,0,157" Width="219"/>
+    </Grid>
+</Window>

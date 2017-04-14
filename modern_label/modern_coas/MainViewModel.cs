@@ -7,12 +7,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Speech.Synthesis;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-
+using System.Xml;
 
 namespace modern_coas
 {
@@ -101,6 +102,50 @@ namespace modern_coas
         }
 
 
+        private ICommand beta_command;
+        public ICommand Beta_command
+        {
+            get
+            {
+                return beta_command ?? (beta_command = new CommandHandler(() => beta_command_action(), _canExecute));
+            }
+        }
+
+        public async void beta_command_action()
+        {
+            StreamWriter w = new StreamWriter(@"W:\windows\IC\activate.bat");
+            w.WriteLine("cscript C:\\Windows\\System32\\slmgr.vbs /ipk " + Wcoa);
+            w.WriteLine("cscript slmgr /ato");
+            w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /inpkey:" + Ocoa);
+            w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /act");
+            w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /dstatus");
+           
+            w.Close();
+
+            XmlDocument doc = new XmlDocument();
+
+            
+            doc.Load("W:\\Windows\\Panther\\unattend.xml");
+            XmlNode root = doc.DocumentElement;
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
+            nsmgr.AddNamespace("bk", "urn:schemas-microsoft-com:unattend");
+            XmlNode objKeyParent = root.SelectSingleNode("descendant::bk:settings[@pass='specialize']/bk:component[@processorArchitecture='amd64']", nsmgr);
+            var objKey =doc.CreateNode("element", "ProductKey", "urn:schemas-microsoft-com:unattend");
+            var objKeyText =doc.CreateNode("text", "", "");
+            objKeyText.InnerText = Wcoa;
+            objKey.AppendChild(objKeyText);
+            objKeyParent.InsertBefore(objKey, objKeyParent.ChildNodes.Item(0));
+            
+            doc.Save("W:\\Windows\\Panther\\unattend.xml");
+
+           
+
+
+            await _dialogCoordinator.ShowMessageAsync(this, "DONE", "DONE");
+
+        }
+
+     
         public async void reuse_command_action()
         {
 
