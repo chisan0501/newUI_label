@@ -6,7 +6,7 @@
                       Title="MainWindow"
                       Height="650"
                       Width="825"
-                      ResizeMode="NoResize"
+                      ResizeMode="CanResizeWithGrip"
                  
                     WindowStartupLocation="CenterScreen"
                         Dialog:DialogParticipation.Register="{Binding}" >
@@ -25,7 +25,6 @@
                         <TextBox x:Name="network_drive" Text="{Binding Network_Driver_status}"  TextWrapping="Wrap" AcceptsReturn="True" Height="61" VerticalScrollBarVisibility="Auto"></TextBox>
 
                     </StackPanel>
-                    <Button Command="{Binding Beta_command}" x:Name="button" Content="Beta" HorizontalAlignment="Left" Margin="49,50,0,0" VerticalAlignment="Top" Width="75" />
                 </Grid>
              
             </TabItem>

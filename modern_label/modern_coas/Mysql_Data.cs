@@ -7,6 +7,7 @@ using System.Configuration;
 using MySql.Data.MySqlClient;
 using System.Diagnostics;
 
+
 namespace modern_coas
 {
     class Mysql_Data
@@ -25,10 +26,28 @@ namespace modern_coas
             else
             {
 
-                conn.ConnectionString = ConfigurationManager.AppSettings["OnlineMySqlConnectionString"];
+                string password = "icdb123!";
+                string result = "";
+                string encryptedstring = "";
+                //conn.ConnectionString = ConfigurationManager.AppSettings["OnlineMySqlConnectionString"];
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                encryptedstring = ConfigurationManager.AppSettings["OnlineMySqlConnectionString"];
+
+                if (encryptedstring.Contains("password"))
+                {
+
+                    encryptedstring = StringCipher.Encrypt(encryptedstring, password);
+                    config.AppSettings.Settings["OnlineMySqlConnectionString"].Value = encryptedstring;
+                    config.Save(ConfigurationSaveMode.Minimal);
+
+                }
+                string decryptedstring = StringCipher.Decrypt(encryptedstring, password);
+                result = decryptedstring;
+                conn.ConnectionString = result;
+                decrypted_string = result;
             }
         }
-
+        public string decrypted_string { get; set; }
         public static string get_script(string script_name)
         {
             string result = "";
@@ -186,7 +205,7 @@ namespace modern_coas
        
         public void report(obj_on_load asset, string wcoa, string ocoa,string station)
         {
-
+            //collect all information and output as a single SQl entry to the database
 
 
 
@@ -213,7 +232,7 @@ namespace modern_coas
 
 
                 conn.Open();
-                String cmdText = "INSERT INTO production_log (pre_coa, time, wcoa, ocoa , Manufacture, Model, CPU , RAM , HDD , serial, channel, location,video_card,screen_size,ictags) VALUES ('" + asset.pre_coa + "','" + DateTime.Now.ToString("yyyy-MM-dd H:mm:ss") + "','" + wcoa + "','" + ocoa + "','" + asset.manu + "','" + asset.model + "','" + asset.cpu + "','" + asset.ram + "MB','" + asset.hdd + "GB', '" + asset.serial + "','" + asset.sku + "','" + station + "','" + MainModel.video_card() + "','" + screen + "','" + asset.ictag + "') ON DUPLICATE KEY UPDATE time = '"+ DateTime.Now.ToString("yyyy-MM-dd H:mm:ss") + "'";
+                String cmdText = "INSERT INTO production_log (pre_coa, time, wcoa, ocoa , Manufacture, Model, CPU , RAM , HDD , serial, channel, location,video_card,screen_size,ictags) VALUES ('" + asset.pre_coa + "','" + DateTime.Now.ToString("yyyy-MM-dd H:mm:ss") + "','" + wcoa + "','" + ocoa + "','" + asset.manu + "','" + asset.model + "','" + asset.cpu + "','" + asset.ram + "MB','" + asset.hdd + "GB', '" + asset.serial + "','" + asset.sku + "','" + station + "','" + MainModel.video_card() + "','" + screen + "','" + asset.ictag + "') ON DUPLICATE KEY UPDATE time = '" + DateTime.Now.ToString("yyyy-MM-dd H:mm:ss") + "', ictags = '" + asset.ictag + "',Manufacture = '" + asset.manu + "',pre_coa='" + asset.pre_coa + "',Model='" + asset.model + "',CPU ='" + asset.cpu + "',RAM = '" + asset.ram + "',HDD='" + asset.cpu + "',serial='" + asset.serial + "',channel = '" + asset.sku + "',location='" + station + "',video_card ='" + asset.video + "', screen_size = '" + asset.screen + "'";
                 MySqlCommand cmd = new MySqlCommand(cmdText, conn);
                 cmd.ExecuteNonQuery();
                 conn.Close();
@@ -247,12 +266,13 @@ namespace modern_coas
             string cmdText = "SELECT pk from coas where Recipient_Organization_Name ='"+channel_name+ "' AND Recipient_Type !='USED' AND Product_Name like '%Windows%' AND location = '" + station + "' order by row_id Asc limit 5";
             
             //      MySqlConnection conn = new MySqlConnection(connStr);
-            MySqlCommand command = conn.CreateCommand();
-
-            conn.Open();
+          
 
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                MySqlCommand command = conn.CreateCommand();
+
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -288,12 +308,13 @@ namespace modern_coas
             string cmdText = "SELECT pk from coas where Recipient_Organization_Name ='" + channel_name + "' AND Recipient_Type !='USED' AND Product_Name like '%Office%' AND location = '" + station + "' order by row_id Asc limit 5";
 
             //      MySqlConnection conn = new MySqlConnection(connStr);
-            MySqlCommand command = conn.CreateCommand();
-
-            conn.Open();
+           
 
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                MySqlCommand command = conn.CreateCommand();
+
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -312,12 +333,13 @@ namespace modern_coas
 
             String cmdText = "SELECT channel_name,full_name from setting where background != 'false' AND background != ''";
             //      MySqlConnection conn = new MySqlConnection(connStr);
-            MySqlCommand command = conn.CreateCommand();
-
-            conn.Open();
+           
 
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                MySqlCommand command = conn.CreateCommand();
+
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -336,14 +358,16 @@ namespace modern_coas
 
         public bool resuse_coa (string coa_id)
         {
+
             bool sucess = false;
             try
             {
                 
-                conn.Open();
+                
                 string cmdText = "insert into coas select * from coas_history where COA_ID='" + coa_id + "'";
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
+                    conn.Open();
                     cmd.ExecuteNonQuery();
                     conn.Close();
                 }
@@ -361,18 +385,20 @@ namespace modern_coas
 
         public string search_coa (string coa_id)
         {
+            //search for coas fromm coa_id.
             string result = "";
 
             try
             {
                 String cmdText = "SELECT pk from coas_history where COA_ID = '"+coa_id+"' limit 1";
                 //      MySqlConnection conn = new MySqlConnection(connStr);
-                MySqlCommand command = conn.CreateCommand();
-
-                conn.Open();
+              
 
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
+                    MySqlCommand command = conn.CreateCommand();
+
+                    conn.Open();
                     MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                     while (reader.Read())
                     {
@@ -396,6 +422,8 @@ namespace modern_coas
 
         public string live_ping()
         {
+
+            //ping MySQL Database for connections.
             string is_connect = "MySQL DB : Offline";
 
             try
@@ -405,7 +433,7 @@ namespace modern_coas
 
 
 
-                conn.ConnectionString = ConfigurationManager.AppSettings["OnlineMySqlConnectionString"];
+                conn.ConnectionString = decrypted_string;
 
 
                 conn.Open();
@@ -423,7 +451,7 @@ namespace modern_coas
 
         public void change_connection_string(string source)
         {
-
+            //reading connection string from app.config, and provide the functionality to switch the connection string via user's selection 
             if (source == "Local DB")
             {
 
@@ -432,7 +460,7 @@ namespace modern_coas
             else
             {
 
-                conn.ConnectionString = ConfigurationManager.AppSettings["OnlineMySqlConnectionString"];
+                conn.ConnectionString = decrypted_string;
             }
         }
 
@@ -444,12 +472,13 @@ namespace modern_coas
             {
                 String cmdText = "SELECT station_dropdown_value from station_setting where station_name ='"+station+"' and description = 'Windows' ";
                 //      MySqlConnection conn = new MySqlConnection(connStr);
-                MySqlCommand command = conn.CreateCommand();
-
-                conn.Open();
+               
 
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
+                    MySqlCommand command = conn.CreateCommand();
+
+                    conn.Open();
                     MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                     while (reader.Read())
                     {
@@ -475,12 +504,13 @@ namespace modern_coas
             {
                 String cmdText = "SELECT station_dropdown_value from station_setting where station_name ='" + station + "' and description = 'Office' ";
                 //      MySqlConnection conn = new MySqlConnection(connStr);
-                MySqlCommand command = conn.CreateCommand();
-
-                conn.Open();
+               
 
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
+                    MySqlCommand command = conn.CreateCommand();
+
+                    conn.Open();
                     MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                     while (reader.Read())
                     {
@@ -506,13 +536,14 @@ namespace modern_coas
            try
             {
                 String cmdText = "SELECT distinct station_name from station_setting";
-                //      MySqlConnection conn = new MySqlConnection(connStr);
-                MySqlCommand command = conn.CreateCommand();
-
-                conn.Open();
+               
+               
 
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
+                    MySqlCommand command = conn.CreateCommand();
+
+                    conn.Open();
                     MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                     while (reader.Read())
                     {

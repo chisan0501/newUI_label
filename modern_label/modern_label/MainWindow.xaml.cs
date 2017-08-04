@@ -213,13 +213,16 @@ namespace modern_label
                 var request = new TraversalRequest(FocusNavigationDirection.Next);
                 request.Wrapped = true;
                 search_rma_box.MoveFocus(request);
+                
+                if (labelViewModel.Search_rma.CanExecute(null))
+                    labelViewModel.Search_rma.Execute(null);
             }
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             Rma_comment_box.Text = "";
-            rmaNum_search_rma_box.Text = "";
+            
             search_rma_box.Text = "";
 
         }
@@ -241,24 +244,7 @@ namespace modern_label
             accentThemeTestWindow.Show();
         }
 
-        private void rma_search_rma_box_KeyDown(object sender, KeyEventArgs g)
-        {
-            if (g.Key == Key.Enter)
-            {
-                var request = new TraversalRequest(FocusNavigationDirection.Next);
-                request.Wrapped = true;
-                rmaNum_search_rma_box.MoveFocus(request);
-            }
-        }
-        private void serial_search_rma_box_KeyDown(object sender, KeyEventArgs f)
-        {
-            if (f.Key == Key.Enter)
-            {
-                var request = new TraversalRequest(FocusNavigationDirection.Next);
-                request.Wrapped = true;
-                serial_search_rma_box.MoveFocus(request);
-            }
-        }
+      
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
@@ -267,9 +253,24 @@ namespace modern_label
             Asset_tag.Clear();
         }
 
-        private void search_box_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        private void input_type_Loaded(object sender, RoutedEventArgs e)
         {
+            input_type.SelectedIndex = 0;
+        }
 
+        private void rci_Loaded(object sender, RoutedEventArgs e)
+        {
+            rci.SelectedIndex = 0;
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void Search_rma_GotFocus(object sender, RoutedEventArgs e)
+        {
+            
         }
     }
     

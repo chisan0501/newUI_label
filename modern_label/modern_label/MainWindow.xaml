@@ -84,7 +84,7 @@
 
                     <Button x:Name="discovery_search_edit"  Command="{Binding discovery_search_edit}" Content="Edit" Style="{StaticResource AccentedSquareButtonStyle}">
 
-                        </Button>
+                    </Button>
                     <Button x:Name="copyTo_rediscovery_btn"  Command="{Binding copyTo_rediscovery_btn}" Content="Copy Data to Rediscovery" Style="{StaticResource AccentedSquareButtonStyle}">
                     </Button>
                 </StackPanel>
@@ -280,7 +280,7 @@
                         <TextBox x:Name="SKU" Controls:TextBoxHelper.Watermark="SKU" Controls:TextBoxHelper.ClearTextButton="True" Controls:TextBoxHelper.UseFloatingWatermark="True"
                          Controls:TextBoxHelper.IsWaitingForData="True" Text="{Binding Label_sku,Mode=TwoWay}"
                          ></TextBox>
-                        
+
                         <Image x:Name="preview_image" Source="{Binding Preview}" Margin="0,10" Height="240"/>
                     </StackPanel>
 
@@ -296,13 +296,13 @@
             </TabItem>
             <TabItem Header="RMA">
                 <Grid>
-                    <StackPanel Margin="200,20,59,526">
+                    <StackPanel Margin="200,20,205,526">
                         <Grid>
-                            <TextBox x:Name="search_rma_box" Controls:TextBoxHelper.Watermark="Enter Asset Tag" Text="{Binding Rma_asset}" KeyDown="TextBox_KeyDown" Margin="0,0,415,0"/>
-                            <Label Margin="120,0,382,0">or</Label>
-                            <TextBox x:Name="serial_search_rma_box" Controls:TextBoxHelper.Watermark="Enter Serial #" Text="{Binding Rma_serial_search}"  Margin="153,0,283,0" KeyDown="serial_search_rma_box_KeyDown"/>
-                            <Label Margin="256,0,246,0">or</Label>
-                            <TextBox x:Name="rmaNum_search_rma_box" Controls:TextBoxHelper.Watermark="Enter RMA #" Text="{Binding Rma_rma_search}"  Margin="284,0,152,0" KeyDown="rma_search_rma_box_KeyDown"/>
+                            <ComboBox x:Name="input_type" ItemsSource="{Binding Mode=TwoWay,Path=Input_type}"  SelectedValue="{Binding Mode=TwoWay,Path=Selected_input}" Margin="179,0,60,0" Loaded="input_type_Loaded" />
+
+                            <TextBox x:Name="search_rma_box" Text="{Binding Rma_asset}" KeyDown="TextBox_KeyDown" Controls:TextBoxHelper.Watermark="Type Here... " Margin="46,0,209,0" />
+
+                            <Button x:Name="Search_rma" Command="{Binding Search_rma}" Margin="328,0,0,0">Search</Button>
 
                         </Grid>
 
@@ -322,9 +322,10 @@
                         <TextBox  Controls:TextBoxHelper.Watermark="RMA Description" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" 
          AcceptsReturn="True" Height="125" Text="{Binding Rma_desc}"/>
                     </StackPanel>
-                    <StackPanel Margin="423,62,142,172">
+                    <StackPanel Margin="423,62,142,124">
                         <Label Content="Refrubisher"></Label>
-                        <TextBox x:Name="rma_user" Controls:TextBoxHelper.Watermark="Refrubisher" Text="{Binding Users_SelectedValue}" />
+                        <ComboBox x:Name="rma_user" ItemsSource="{Binding Mode=TwoWay,Path=Users}" SelectedIndex="-1" SelectedValue="{Binding Mode=TwoWay,Path=Users_SelectedValue}">
+                        </ComboBox>
                         <Label Content="Date"></Label>
                         <TextBox Controls:TextBoxHelper.Watermark="Date" Text="{Binding Today}"/>
                         <Label Content="Next Process"></Label>
@@ -334,31 +335,20 @@
                         <Label Content="Refrubisher Comment"></Label>
                         <TextBox x:Name="Rma_comment_box"  Controls:TextBoxHelper.Watermark="Refrubisher Comment" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" 
          AcceptsReturn="True" Height="125" Text="{Binding Rma_comment}"/>
+                        <Label Content="RCI Partner Origin" Height="27" />
+                        <ComboBox x:Name="rci" ItemsSource="{Binding Mode=TwoWay,Path=Rci_Input_type}"  SelectedValue="{Binding Mode=TwoWay,Path=Rci_Selected_input}" Height="1" Loaded="rci_Loaded" />
                     </StackPanel>
-                    <StackPanel Margin="452,413,271,108">
-                        <Button Command="{Binding Edit_rma}" Style="{DynamicResource MetroCircleButtonStyle}" Height="56" Margin="0,0,1,0">
-                            <Rectangle Width="20"
-                   Height="20"
-                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}">
-                                <Rectangle.OpacityMask>
-                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_upload}" />
-                                </Rectangle.OpacityMask>
-                            </Rectangle>
-                        </Button>
+                    <StackPanel Margin="423,464,300,57">
+                        <Button Command="{Binding Edit_rma}" Content="Update" Height="34" Margin="0,0,-32,0"/>
                     </StackPanel>
-                    <StackPanel Margin="561,414,162,95">
-                        <Button Style="{DynamicResource MetroCircleButtonStyle}" Height="56" Margin="0,0,1,0" Click="Button_Click_1">
-                            <Rectangle Width="20"
-                   Height="20"
-                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}">
-                                <Rectangle.OpacityMask>
-                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_delete}" />
-                                </Rectangle.OpacityMask>
-                            </Rectangle>
-                        </Button>
+                    <StackPanel Margin="200,501,507,20">
+                        <Button x:Name="sync_btn" Content="Fetch Missing Entry" Command="{Binding Refetch_rma}" IsEnabled="{Binding Sync_enable}"  Height="25" Click="Button_Click_3" Margin="-36,0,-110,0" ToolTip="RMA fields missing info? try to resync data from SalesForce Database"/>
+                    </StackPanel>
+                    <StackPanel Margin="581,464,142,45">
+                        <Button  Height="33" Content="Clear" Click="Button_Click_1" Margin="-25,0,0,0"/>
                     </StackPanel>
                 </Grid>
-
+            
             </TabItem>
             <TabItem Header="Imaging Data">
                 <Grid>
@@ -382,6 +372,35 @@
                         <Button x:Name="imaging_search_edit" Content="Edit" Style="{StaticResource AccentedSquareButtonStyle}" Click="imaging_edit_Click">
 
                         </Button>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Bulk">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+
+                        <ColumnDefinition Width="187" />
+
+                        <ColumnDefinition Width="260*" />
+
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Column="0" Grid.Row="0" Grid.RowSpan="2">
+
+                        <TextBox Height="400" Width="auto" Text="{Binding bulkSubmit_asset}" TextWrapping="Wrap" AcceptsReturn="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                            
+                        </TextBox>
+                        <Button Content="Submit" Command="{Binding BulkShowInputDialogCommand}"></Button>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Grid.Row="1" >
+
+                        <ComboBox x:Name="bulk_channel_dropdown" SelectedItem="{Binding Selected_channel, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select Channel" ItemsSource="{Binding channel_list,Mode=TwoWay}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" SelectionChanged="channel_dropdown_SelectionChanged" />
+                        <ComboBox x:Name="bulk_sku_dropdown"  SelectedItem="{Binding Selected_sku, Mode=TwoWay}" Controls:TextBoxHelper.Watermark="Select SKU" Controls:TextBoxHelper.ClearTextButton="True" ItemsSource="{Binding Path=Sku_list,Mode=TwoWay}" Controls:TextBoxHelper.UseFloatingWatermark="True" SelectedIndex="-1" />
+
                     </StackPanel>
                 </Grid>
             </TabItem>
@@ -417,7 +436,7 @@
 
             </StatusBarItem>
             <Separator Style="{StaticResource MetroStatusBarSeparator}"></Separator>
-          
+
             <StatusBarItem>
 
 

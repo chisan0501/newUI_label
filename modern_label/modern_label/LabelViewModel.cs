@@ -29,7 +29,7 @@ namespace modern_label
         private readonly IDialogCoordinator _dialogCoordinator;
         protected ValidationHelper Validator { get; private set; }
         private NotifyDataErrorInfoAdapter NotifyDataErrorInfoAdapter { get; set; }
-
+        public string temp_brand { get; set; }
         public sf sf { get; set; }
         public rma_result rma_result { get; set; }
         public LabelModel LabelModel { get; set; }
@@ -90,6 +90,30 @@ namespace modern_label
             remove { NotifyDataErrorInfoAdapter.ErrorsChanged -= value; }
         }
 
+
+        public async void bulkcustomactionAsync()
+        {
+            var mage = new magento_listing();
+            bulksubmit_asset = bulksubmit_asset.Replace("\r\n", "\n");
+            string[] allLines = bulksubmit_asset.Split('\n');
+            var bulk_asset = new List<RefrubHistoryObj>();
+            foreach (var item in allLines)
+            {
+                var temp_item = mysql_data.disco_data(int.Parse(item));
+                temp_item.pallet = Selected_sku;
+                temp_item.refurbisher = Users_SelectedValue;
+                temp_item = await process_listingAsync(temp_item);
+                temp_item.sku = temp_item.sku + "_"+ item;
+                mage.create_listing(temp_item,true);
+                // bulk_asset.Add(temp_item);
+            }
+
+
+
+            //RefrubHistoryObj = mysql_data.redisco_data(submit_asset);
+
+        }
+
         public async void customAction()
         {
 
@@ -102,19 +126,30 @@ namespace modern_label
             }
             if (validationResult.IsValid == false)
             {
-                await _dialogCoordinator.ShowMessageAsync(this, "Error", message);
+                await _dialogCoordinator.ShowMessageAsync(this, "Message", message);
                 return;
             }
-            string sku = "Empty";
+            
 
-            var listing = new magento_listing();
+            
 
             RefrubHistoryObj = mysql_data.redisco_data(submit_asset);
+
+            RefrubHistoryObj = await process_listingAsync(RefrubHistoryObj);
+
+        }
+
+        //go thru list of logic and generate content of the listing
+        public async Task<RefrubHistoryObj> process_listingAsync(RefrubHistoryObj RefrubHistoryObj)
+        {
+            var listing = new magento_listing();
+            string sku = "Empty";
+            string message = "Please Check the following input: \n\r";
             if (RefrubHistoryObj.cpu == null)
             {
-                message = "Asset Not Found in Rediscovery.";
+                message = RefrubHistoryObj.asset_tag + " Not Found in Database.";
                 await _dialogCoordinator.ShowMessageAsync(this, "Error", message);
-                return;
+                return RefrubHistoryObj;
             }
 
             RefrubHistoryObj.refurbisher = this.Users_SelectedValue;
@@ -137,17 +172,33 @@ namespace modern_label
                     //format the sku before passing on
                     string temp_cpu;
                     //create the temp variable to hold the sku construct info 
-                    var temp_brand = magento_sku.compute_difference(RefrubHistoryObj.made, magento_sku.brand_name());
-                    RefrubHistoryObj.brand = temp_brand;
-                    if(selected_channel == "NGO")
+                    var brand_name = magento_sku.brand_name();
+                    foreach (var brand in brand_name)
                     {
-                         temp_cpu = magento_sku.ngo_title(RefrubHistoryObj);
+
+                        if (RefrubHistoryObj.made.Equals(brand.Key, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            temp_brand = brand.Value;
+                            break;
+                        }
+                        else
+                        {
+                            temp_brand = "Generic";
+                        }
+                    }
+
+
+                    //  var temp_brand = magento_sku.compute_difference(RefrubHistoryObj.made, magento_sku.brand_name());
+                    RefrubHistoryObj.brand = temp_brand;
+                    if (selected_channel == "NGO")
+                    {
+                        temp_cpu = magento_sku.ngo_title(RefrubHistoryObj);
                     }
                     else
                     {
-                         temp_cpu = magento_sku.comput_title(RefrubHistoryObj);
+                        temp_cpu = magento_sku.comput_title(RefrubHistoryObj);
                     }
-                    
+
 
 
                     RefrubHistoryObj.ram = magento_sku.ram_format(RefrubHistoryObj, false);
@@ -156,10 +207,10 @@ namespace modern_label
 
                     var magento_listing = listing.listing_info(RefrubHistoryObj);
                     RefrubHistoryObj = magento_sku.format_sku(RefrubHistoryObj);
-                
-                        RefrubHistoryObj.sku = RefrubHistoryObj.brand + "_" + RefrubHistoryObj.model + "_" + temp_cpu + "_" + RefrubHistoryObj.ram + "_" + RefrubHistoryObj.hdd + RefrubHistoryObj.type + RefrubHistoryObj.grade;
-                    
-                 
+
+                    RefrubHistoryObj.sku = RefrubHistoryObj.brand + "_" + RefrubHistoryObj.model + "_" + temp_cpu + "_" + RefrubHistoryObj.ram + "_" + RefrubHistoryObj.hdd + RefrubHistoryObj.type + RefrubHistoryObj.grade;
+
+
                     break;
                 case "Online Order":
                     await _dialogCoordinator.ShowInputAsync(this, "Online Order", "Please Enter Order #").ContinueWith(t => sku = (t.Result));
@@ -198,7 +249,7 @@ namespace modern_label
                     break;
             }
             Label_sku = RefrubHistoryObj.sku;
-            
+
             var img_result = mysql_data.img_data(submit_asset.ToString());
             Img_wcoa = img_result.img_wcoa;
             Img_ocoa = img_result.img_ocoa;
@@ -214,12 +265,9 @@ namespace modern_label
             Printer_enable = true;
 
 
-
-
-
-
-
+            return RefrubHistoryObj;
         }
+
         public void printAction()
         {
             //validate if magento have exisiting listing
@@ -244,19 +292,43 @@ namespace modern_label
 
         public async void EditAction()
         {
-            string message = "";
+
+            var rma_Validator = new ValidationHelper();
+            NotifyDataErrorInfoAdapter = new NotifyDataErrorInfoAdapter(rma_Validator);
+            rma_Validator.AddRequiredRule(() => Users_SelectedValue, "Refurbisher is required");
+            rma_Validator.AddRequiredRule(() => Next_process, "Next Process is required");
+            NotifyDataErrorInfoAdapter.ErrorsChanged += OnErrorsChanged;
+            MvvmValidation.ValidationResult validationResult = rma_Validator.ValidateAll();
+
+
+            NotifyDataErrorInfoAdapter = new NotifyDataErrorInfoAdapter(rma_Validator);
+
+            NotifyDataErrorInfoAdapter.ErrorsChanged += OnErrorsChanged;
+
+            string err_message = "Please Check the following input: \n\r";
+
+            foreach (var item in validationResult.ErrorList)
+            {
+                err_message += item.ErrorText + "\n\r";
+
+            }
+
+            if (validationResult.IsValid == false)
+            {
+                await _dialogCoordinator.ShowMessageAsync(this, "Error", err_message);
+                return;
+            }
+            
             Rma_finding = "Refrubisher: " + Users_SelectedValue + "\r\nDate received: " + Today + "\r\nDiagnostic finding: " + Rma_comment + Next_process;
-            bool sucess = sf.update_rma(rma_id, rma_finding, rma_ictag);
-            if (sucess == true)
-            {
-                message = "RMA Info Updated";
-                await _dialogCoordinator.ShowMessageAsync(this, "Message", message);
-            }
-            else
-            {
-                message = "An error has occurred";
-                await _dialogCoordinator.ShowMessageAsync(this, "Error", message);
-            }
+            string return_message = sf.update_rma(rma_id, rma_finding, rma_ictag, rci_selected_input);
+            
+            await _dialogCoordinator.ShowMessageAsync(this, "Message", return_message);
+            
+            
+
+            Refrub_checked = false;
+            recycle_checked = false;
+            ebay_checked = false;
         }
 
         public async void AddChannelAction()
@@ -358,6 +430,18 @@ namespace modern_label
 
         }
 
+        private string bulksubmit_asset;
+        public string bulkSubmit_asset {
+
+            get { return bulksubmit_asset; }
+            set
+            {
+
+                if (value != bulksubmit_asset)
+                    bulksubmit_asset = value;
+                RaisePropertyChanged("bulkSubmit_asset");
+            }
+        }
 
         private int submit_asset;
         public int Submit_asset
@@ -491,6 +575,29 @@ namespace modern_label
 
         }
 
+        private List<string> rci_input_type;
+        public List<string> Rci_Input_type
+        {
+            get { return rci_input_type; }
+
+            set
+            {
+                rci_input_type = value;
+            }
+
+        }
+
+
+        private List<string> input_type;
+        public List<string> Input_type {
+            get { return input_type; }
+
+            set
+            {
+                input_type = value;
+            }
+
+        }
 
         private List<LabelModel.computer_type> computer_type;
         public List<LabelModel.computer_type> Computer_type
@@ -963,9 +1070,33 @@ namespace modern_label
             }
         }
 
+        private string rci_selected_input;
+        public string Rci_Selected_input
+        {
+            get
+            {
+                return rci_selected_input;
+            }
+            set
+            {
+                rci_selected_input = value;
+                RaisePropertyChanged("Selected_input");
+            }
 
+        }
 
+        private string selected_input;
+        public string Selected_input {
+            get
+            {
+                return selected_input;
+            }
+            set {
+                selected_input = value;
+                RaisePropertyChanged("Selected_input");
+            }
 
+        }
 
 
 
@@ -1162,6 +1293,142 @@ namespace modern_label
         }
 
 
+        //RMA search button
+        public async void SearchActionAsync()
+        {
+            
+            var rma_Validator = new ValidationHelper();
+            NotifyDataErrorInfoAdapter = new NotifyDataErrorInfoAdapter(rma_Validator);
+            rma_Validator.AddRequiredRule(() => Rma_asset, "Search Field is required");
+
+            NotifyDataErrorInfoAdapter.ErrorsChanged += OnErrorsChanged;
+            MvvmValidation.ValidationResult validationResult = rma_Validator.ValidateAll();
+
+
+            NotifyDataErrorInfoAdapter = new NotifyDataErrorInfoAdapter(rma_Validator);
+
+            NotifyDataErrorInfoAdapter.ErrorsChanged += OnErrorsChanged;
+
+            string err_message = "Please Check the following input: \n\r";
+
+            foreach (var item in validationResult.ErrorList)
+            {
+                err_message += item.ErrorText + "\n\r";
+
+            }
+
+            if (validationResult.IsValid == false)
+            {
+                await _dialogCoordinator.ShowMessageAsync(this, "Error", err_message);
+                return;
+            }
+
+            sf = new sf();
+
+            switch (Selected_input)
+            {
+
+                case "Asset Tag":
+                    rma_result = sf.get_rma(Rma_asset);
+                    if (rma_result.rma_description == null) {
+                        string x = await _dialogCoordinator.ShowInputAsync(this, "Message", "No Record Found Assoicated with this Asset Tag or the case Description is Empty, We can try to search with RMA # ").ContinueWith(t => Rma_asset = (t.Result));
+                        if (x != null) {
+                            Selected_input = "RMA Number";
+                            rma_result = sf.get_rma_num(Rma_asset);
+                            if (rma_result.rma_description == null)
+                            {
+                                var selection = await _dialogCoordinator.ShowMessageAsync(this, "Message", "No Case is Associated with this RMA # Would you like to Fetch Data from SalesForce? ", MessageDialogStyle.AffirmativeAndNegative);
+                                if (selection == MessageDialogResult.Negative)
+                                {
+                                    return;
+                                }
+                                refetch_rma_actionAsync();
+                                rma_result = sf.get_rma_num(Rma_asset);
+                            }
+                        }
+                       
+                    }
+                    break;
+                case "Serial Number":
+                    rma_result = sf.get_rma_serial(Rma_asset);
+                    break;
+                case "RMA Number":
+                    rma_result = sf.get_rma_num(Rma_asset);
+                    if (rma_result.rma_description == null) {
+                       var selection = await _dialogCoordinator.ShowMessageAsync(this,"Message", "No Case is Associated with this RMA # Would you like to Fetch Data from SalesForce? ", MessageDialogStyle.AffirmativeAndNegative);
+                        if (selection == MessageDialogResult.Negative)
+                        {
+                            return;
+                        }
+                        refetch_rma_actionAsync();
+                        rma_result = sf.get_rma_num(Rma_asset);
+                    }
+                   
+                    break;
+            }
+
+            Rma_number = rma_result.rma_number;
+            Rma_channel = rma_result.channel;
+            Rma_date = rma_result.date_request;
+            Rma_desc = rma_result.rma_description;
+            Rma_ictag = rma_result.asset_tag;
+            Rma_serial = rma_result.serial;
+            Rma_comment = rma_result.production_finding;
+            rma_id = rma_result.id;
+            Sync_enable = true;
+
+        }
+        public async void refetch_rma_actionAsync()
+        {
+            if (Selected_input == "RMA Number")
+            {
+                Rma_number = Rma_asset;
+            }
+            if (string.IsNullOrEmpty(Rma_number) && Selected_input != "RMA Number") {
+
+                await _dialogCoordinator.ShowMessageAsync(this, "Error", "RMA Number is empty");
+                return;
+            }
+
+            var sf = new sf();
+
+            var item = sf.search_rma(Rma_number);
+            
+            //check if RMA entry exisit in ICDB
+
+            if (mysql_data.check_exist(Rma_number) == false)
+            {
+
+                await _dialogCoordinator.ShowMessageAsync(this, "Message", mysql_data.insert_rma(item));
+            }
+            else {
+               
+                await _dialogCoordinator.ShowMessageAsync(this, "Message", mysql_data.update_rma(item));
+            }
+
+            Sync_enable = false;
+
+
+
+        }
+
+        private ICommand refetch_rma;
+        public ICommand Refetch_rma {
+
+
+            get {
+                return refetch_rma ?? (refetch_rma = new CommandHandler(() => refetch_rma_actionAsync(), _canExecute));
+            }
+        }
+
+        private ICommand search_rma;
+        public ICommand Search_rma {
+            get
+            {
+                return search_rma ?? (search_rma = new CommandHandler(() => SearchActionAsync(), _canExecute));
+            }
+        }
+
         private ICommand edit_rma;
         public ICommand Edit_rma
         {
@@ -1171,26 +1438,32 @@ namespace modern_label
             }
         }
 
+        private ICommand bulkshowInputDialogCommand;
+        public ICommand BulkShowInputDialogCommand
+        {
+            get
+            {
+                return bulkshowInputDialogCommand ?? (bulkshowInputDialogCommand = new CommandHandler(() => bulkcustomactionAsync(), _canExecute));
+            }
+        }
+
         private ICommand showInputDialogCommand;
         public ICommand ShowInputDialogCommand
         {
             get
             {
                 return showInputDialogCommand ?? (showInputDialogCommand = new CommandHandler(() => customAction(), _canExecute));
-
             }
         }
         private string rma_finding;
         public string Rma_finding
         {
-
             get { return rma_finding; }
             set
             {
                 rma_finding = value;
                 RaisePropertyChanged("rma_finding");
             }
-
         }
 
         private string rma_channel;
@@ -1202,7 +1475,6 @@ namespace modern_label
                 rma_channel = value;
                 RaisePropertyChanged("rma_channel");
             }
-
         }
 
         private string rma_number;
@@ -1260,6 +1532,21 @@ namespace modern_label
 
         }
 
+        private bool sync_enable;
+        public bool Sync_enable
+        {
+            get
+            {
+
+                return sync_enable;
+            }
+            set
+            {
+
+                sync_enable = value;
+                RaisePropertyChanged("Sync_enable");
+            }
+        }
 
         private bool refrub_checked;
         public bool Refrub_checked
@@ -1386,7 +1673,9 @@ namespace modern_label
                 //add db select list
                 DB_select = LabelModel.db_select;
                 Computer_type = LabelModel.computer_dropdown;
+                Input_type = LabelModel.input_type;
                 Grade_list = LabelModel.grade_list;
+                Rci_Input_type = LabelModel.rci_input_type;
                 Printer_list = LabelModel.printer_list;
                 channel_list = mysql_data.channel_list();
                 _canExecute = true;
@@ -1440,17 +1729,7 @@ namespace modern_label
                 switch (propName)
                 {
                   
-                    case "Rma_rma_search":
-                        sf = new sf();
-                        rma_result = sf.get_rma_num(Rma_rma_search);
-                        Rma_number = rma_result.rma_number;
-                        Rma_channel = rma_result.channel;
-                        Rma_date = rma_result.date_request;
-                        Rma_desc = rma_result.rma_description;
-                        Rma_ictag = rma_result.asset_tag;
-                        Rma_serial = rma_result.serial;
-                        rma_id = rma_result.id;
-                        break;
+                   
                     case "Db_index":
 
                         switch (Db_index)
@@ -1493,32 +1772,13 @@ namespace modern_label
                     case "Selected_sku":
 
                         break;
-                    case "Rma_serial_search":
-                        sf = new sf();
-                        rma_result = sf.get_rma_serial(rma_serial_search);
-                        Rma_number = rma_result.rma_number;
-                        Rma_channel = rma_result.channel;
-                        Rma_date = rma_result.date_request;
-                        Rma_desc = rma_result.rma_description;
-                        Rma_ictag = rma_result.asset_tag;
-                        Rma_serial = rma_result.serial;
-                        rma_id = rma_result.id;
-                        break;
+                    
                     case "rma_asset":
-                        sf = new sf();
-                        rma_result = sf.get_rma(Rma_asset);
-                        Rma_number = rma_result.rma_number ;
-                        Rma_channel = rma_result.channel;
-                        Rma_date = rma_result.date_request;
-                        Rma_desc = rma_result.rma_description;
-                        Rma_ictag = rma_result.asset_tag;
-                        Rma_serial = rma_result.serial;
-                        Rma_comment = rma_result.production_finding;
-                        rma_id = rma_result.id;
-                       
+                      
+                        break;
+                    case "Selected_input":
 
                         break;
-
                     case "Refrub_checked":
                         Next_process = "\r\nNext process: Refrubish";
                         break;
@@ -1804,15 +2064,4 @@ namespace modern_label
         
       
     }
-
-   
-
-
-   
-
-
-
-   
-
-
 }

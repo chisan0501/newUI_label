@@ -96,6 +96,40 @@ namespace modern_label
             public string value { get; set; }
 
         }
+        public List<string> rci_input_type {
+
+            get
+            {
+
+                List<string> type = new List<string>();
+                type.Add("InterConnection");
+                type.Add("PCRR");
+
+                return type;
+            }
+            set
+            {
+
+            }
+
+        }
+
+        public List<string> input_type {
+
+            get {
+
+                List<string> type = new List<string>();
+                type.Add("Asset Tag");
+                type.Add("Serial Number");
+                type.Add("RMA Number");
+                return type;
+            }
+            set
+            {
+
+            }
+        }
+
         public List<computer_type> computer_dropdown
         {
 
@@ -138,6 +172,7 @@ namespace modern_label
 
     public class RefrubHistoryObj
     {
+        
         public string is_ssd { get; set; }
         public int asset_tag { get; set; }
         public DateTime time { get; set; }
@@ -149,7 +184,7 @@ namespace modern_label
         public string made { get; set; }
         public string cpu { get; set; }
         public string serial { get; set; }
-       
+       public string title_cpu { get; set; }
         public string channel { get; set; }
         public string selected_printer { get; set; }
         public string type { get; set; }

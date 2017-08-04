@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using modern_label.SF;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -138,12 +139,13 @@ namespace modern_label
             var img_result = new imaging_search_result();
           
             
-            conn.Open();
+            
             String cmdText = "SELECT * from production_log where ictags = '" + asset + "'";
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
-
+                
                 while (reader.Read())
                 {
                     img_result.img_wcoa = (reader["wcoa"].ToString());
@@ -167,10 +169,11 @@ namespace modern_label
 
             
             
-            conn.Open();
+            
             String cmdText = "SELECT * from rediscovery where ictag = '" + asset + "'";
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -201,10 +204,11 @@ namespace modern_label
           
        
            
-            conn.Open();
+            
             String cmdText = "SELECT * from discovery where ictag = '" + asset + "'";
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -215,7 +219,7 @@ namespace modern_label
                     result.search_model = (reader["model"].ToString());
                     result.search_serial = (reader["serial"].ToString());
                     result.search_optical_drive = (reader["optical_drive"].ToString());
-
+                    
                 }
                 conn.Close();
             }
@@ -277,24 +281,25 @@ namespace modern_label
 
        
 
-        public Dictionary<String,int> sku_brand()
+        public Dictionary<String,string> sku_brand()
          {
-            var result = new Dictionary<string, int>();
+            var result = new Dictionary<string, string>();
 
           try
             {
                 String cmdText = "select * from magento_sku_brand";
 
-                MySqlCommand command = conn.CreateCommand();
-
-                conn.Open();
-
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
+                   
+
+                    MySqlCommand command = conn.CreateCommand();
+
+                    conn.Open();
                     MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                     while (reader.Read())
                     {
-                        result.Add(reader["name"].ToString(), int.Parse(reader["index"].ToString()));
+                        result.Add(reader["name"].ToString(), reader["sku_name"].ToString());
 
                     }
                     conn.Close();
@@ -309,7 +314,140 @@ namespace modern_label
             return result;
         }
 
-        
+
+        public bool check_exist(string rma_number) {
+            var exist = false;
+
+            String cmdText = "select * from rma where rma_number = '" + rma_number + "'";
+
+           
+
+            using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
+            {
+                MySqlCommand command = conn.CreateCommand();
+
+                conn.Open();
+                MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
+                if (reader.Read())
+                {
+                    exist = true;
+                }
+                conn.Close();
+
+            }
+
+
+            return exist;
+        }
+        public string insert_rma(List<Case> input)
+        {
+
+            if (input.Count == 0)
+            {
+                return "No record Found";
+
+            }
+            string message = "SalesForce Entry Insert Complete";
+
+            foreach (var item in input)
+            {
+
+                try
+                {
+                    string strdatetime = item.CreatedDate.HasValue ? item.CreatedDate.Value.ToString("yyyy-MM-dd") : string.Empty;
+
+                    item.Description = item.Description.Replace("'", "''");
+                    MySqlCommand command = conn.CreateCommand();
+                    command.CommandText = "Insert into rma (rma_number,case_number,id,channel,date_requested,resolution_code,ictag,description) values ('"+item.RMA_number__c+"','"+item.CaseNumber+"','"+item.Id+"','"+item.Channel__c+"','"+ strdatetime + "','"+item.Return_Resolution__c+"','"+item.IC_Barcodes__c+"','"+item.Description+"')";
+                    
+                    conn.Open();
+                    command.ExecuteNonQuery();
+                    conn.Close();
+
+
+                }
+                catch (Exception e)
+                {
+                    message = e.Message;
+                }
+
+            }
+
+
+
+
+
+
+            return message;
+        }
+        public string update_rma(List<Case> input) {
+
+            if (input.Count == 0) {
+                return "No record Found";
+
+            }
+            string message = "SalesForce reSync Complete";
+
+            foreach (var item in input) {
+
+                try
+                {
+
+                    MySqlCommand command = conn.CreateCommand();
+                    command.CommandText = "UPDATE rma SET production_finding = '" + item.Production_Findings__c + "',ictag='" + item.IC_Barcodes__c + "',description='" + item.Description + "' where rma_number ='" +item.RMA_number__c+"'";
+                    conn.Open();
+                    command.ExecuteNonQuery();
+                    conn.Close();
+
+
+                }
+                catch (Exception e)
+                {
+                    message = e.Message;
+                }
+
+            }
+           
+
+
+
+
+
+            return message;
+        }
+
+
+        public RefrubHistoryObj disco_data(int asset)
+        {
+
+            var result = new RefrubHistoryObj();
+
+
+            //   LabelModel.status = "Connection Successful";
+            String cmdText = "select * from discovery where ictag ='" + asset + "'";
+
+
+
+
+            using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
+            {
+                conn.Open();
+
+                MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
+                while (reader.Read())
+                {
+                    result = new RefrubHistoryObj() { asset_tag = int.Parse(reader["ictag"].ToString()), time = DateTime.Parse(reader["time"].ToString()), hdd = (reader["hdd"].ToString()), ram = (reader["ram"].ToString()), cpu = (reader["cpu"].ToString()), made = (reader["brand"].ToString()), model = (reader["model"].ToString()), serial = (reader["serial"].ToString()), optical_drive = (reader["optical_drive"].ToString()), is_ssd = (reader["has_SSD"].ToString()) };
+
+                }
+                conn.Close();
+                result.ram = magento_sku.ram_format(result, false);
+                result.hdd = magento_sku.hdd_format(false, result);
+            }
+
+
+
+            return result;
+        }
 
         public RefrubHistoryObj redisco_data (int asset )
         {
@@ -319,13 +457,14 @@ namespace modern_label
             
             //   LabelModel.status = "Connection Successful";
             String cmdText = "select * from rediscovery where ictag ='"+asset+"'";
-         
-           
+            
 
-            conn.Open();
+
 
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                conn.Open();
+
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -422,12 +561,13 @@ namespace modern_label
                 //   LabelModel.status = "Connection Successful";
                 String cmdText = "select * from rediscovery where time between CURDATE() AND DATE_ADD(CURDATE(), INTERVAL +1 DAY)";
 
-                MySqlCommand command = conn.CreateCommand();
-
-                conn.Open();
+                
 
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
+                    MySqlCommand command = conn.CreateCommand();
+
+                    conn.Open();
                     MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                     while (reader.Read())
                     {
@@ -456,12 +596,14 @@ namespace modern_label
           
             String cmdText = "select * from magento_html where name = '" + brand_name + "'";
        
-            MySqlCommand command = conn.CreateCommand();
-
-            conn.Open();
+          
+            
 
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                MySqlCommand command = conn.CreateCommand();
+
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -487,12 +629,13 @@ namespace modern_label
            
             String cmdText = "select * from magento_html where name = '" + condition + "'";
         
-            MySqlCommand command = conn.CreateCommand();
-
-            conn.Open();
 
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+
+                MySqlCommand command = conn.CreateCommand();
+
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -514,12 +657,13 @@ namespace modern_label
           
             String cmdText = "select html from magento_html where name = '"+condition+"'";
    
-            MySqlCommand command = conn.CreateCommand();
-
-            conn.Open();
+           
 
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                MySqlCommand command = conn.CreateCommand();
+
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -541,12 +685,12 @@ namespace modern_label
             {
               
       
-                MySqlCommand command = conn.CreateCommand();
-                conn.Open();
+               
                 String cmdText = "Insert into label_menu(name,product)VALUES ('"+channel_name+"','"+sku+"')";
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
-
+                    MySqlCommand command = conn.CreateCommand();
+                    conn.Open();
                     cmd.ExecuteNonQuery();
                     conn.Close();
                     sucesss = true;
@@ -567,12 +711,13 @@ namespace modern_label
            
             String cmdText = "select * from magento_html where type = 'ram' and name ='" + size + "'";
           
-            MySqlCommand command = conn.CreateCommand();
-
-            conn.Open();
+            
 
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                MySqlCommand command = conn.CreateCommand();
+
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -594,12 +739,13 @@ namespace modern_label
            
             String cmdText = "select * from magento_html where type = 'hdd' and name ='"+size+"'";
             
-            MySqlCommand command = conn.CreateCommand();
-
-            conn.Open();
+           
 
             using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
             {
+                MySqlCommand command = conn.CreateCommand();
+
+                conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                 while (reader.Read())
                 {
@@ -622,12 +768,13 @@ namespace modern_label
             {
                 String cmdText = "SELECT product from label_menu where name = '" + channel + "'";
 
-                MySqlCommand command = conn.CreateCommand();
-
-                conn.Open();
+              ;
 
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
+                    MySqlCommand command = conn.CreateCommand();
+
+                    conn.Open();
                     MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                     while (reader.Read())
                     {
@@ -659,12 +806,13 @@ namespace modern_label
             {
                 String cmdText = "SELECT distinct name from label_menu order by name";
 
-                MySqlCommand command = conn.CreateCommand();
-
-                conn.Open();
 
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
+
+                    MySqlCommand command = conn.CreateCommand();
+
+                    conn.Open();
                     MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                     while (reader.Read())
                     {
@@ -684,6 +832,7 @@ namespace modern_label
             
 }
 
+       
 
         public List<String> users ()
         {
@@ -693,12 +842,13 @@ namespace modern_label
             {
                 String cmdText = "SELECT user_name from users";
 
-                MySqlCommand command = conn.CreateCommand();
-
-                conn.Open();
+                
 
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))
                 {
+                    MySqlCommand command = conn.CreateCommand();
+
+                    conn.Open();
                     MySqlDataReader reader = cmd.ExecuteReader(); //execure the reader
                     while (reader.Read())
                     {

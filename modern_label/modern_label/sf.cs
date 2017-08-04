@@ -18,7 +18,7 @@ namespace modern_label
             conn.ConnectionString = ConfigurationManager.AppSettings["OnlineMySqlConnectionString"];
         }
         
-        public sObject search_rma(string ictag)
+        public List<Case> search_rma(string case_num)
         {
             string userName;
             string password;
@@ -58,18 +58,23 @@ namespace modern_label
             QueryResult queryResult = null;
             String SOQL = "";
 
-            SOQL = "SELECT Description ,IC_Barcodes__c,RMA_number__c,Production_Findings__c,Channel__c,Date_RMA_Requested__c FROM case where IC_Barcodes__c = '" + ictag + "' ";
+            SOQL = SOQL = "SELECT Id,Return_Resolution__c,Description,CaseNumber,IC_Barcodes__c,RMA_number__c,Production_Findings__c,Channel__c,CreatedDate FROM case where RMA_number__c = '" + case_num + "' ";
             queryResult = sfdcBinding.query(SOQL);
+            List<Case> case_result = new List<Case>();
+            
+            for (int i = 0; i < queryResult.size; i++)
+            {
+                
+                case_result.Add((Case)queryResult.records[i]);
 
-            var result = queryResult.records[0];
-
-            return result;
+            }
+            return case_result;
         }
 
 
-        public bool update_rma (string id, string finding, string asset_tag)
+        public string update_rma (string id, string finding, string asset_tag, string rci)
         {
-            bool sucess = false;
+            string message = "RMA Info Updated";
             try
             {
                 conn.Open();
@@ -77,7 +82,7 @@ namespace modern_label
                 command.CommandText = "UPDATE rma set production_finding = '" + finding + "' WHERE ictag = '" + asset_tag + "'";
                 command.ExecuteNonQuery();
                 conn.Close();
-                sucess = true;
+                
                
                 string userName;
                 string password;
@@ -98,6 +103,7 @@ namespace modern_label
                 sfdcBinding.SessionHeaderValue.sessionId = currentLoginResult.sessionId;
                 var update_case = new Case();
 
+                update_case.RCI_Partner_Origin__c = rci;
                 update_case.Reviewed_by_Production__cSpecified = true;
                 update_case.Reviewed_by_Production__c = true;
                 update_case.Id = id;
@@ -108,30 +114,31 @@ namespace modern_label
 
                 SaveResult[] saveResults = sfdcBinding.update(new sObject[] { update_case });
 
-                string result = "";
+                
                 if (saveResults[0].success)
                 {
                     
-                    result = "The update of Lead ID " + saveResults[0].id + " was succesful";
-
+                    message = "The update of Lead ID " + saveResults[0].id + " was succesful";
+                    
                 }
                 else
                 {
-                    sucess = false;
-                    result = "There was an error updating the Lead. The error returned was " + saveResults[0].errors[0].message;
+                    
+                    message = "There was an error updating the Lead. The error returned was " + saveResults[0].errors[0].message;
                 }
 
 
-
+                
 
 
             }
             catch(Exception e)
             {
+                message = e.Message;
                 conn.Close();
             }
-            
-            return sucess;
+
+            return message;
 
 
         }
@@ -166,6 +173,12 @@ namespace modern_label
 
         public rma_result get_rma_serial(string serial)
         {
+            if (serial == null) {
+
+                serial = "null serial not allowed";
+                
+            }
+
             var rma_result = new rma_result();
             MySqlCommand command = conn.CreateCommand();
             
@@ -216,6 +229,9 @@ namespace modern_label
             }
             return rma_result;
         }
-    
+
+
+     
+
     }
 }

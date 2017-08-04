@@ -117,14 +117,17 @@ namespace modern_coas
             var script = Mysql_Data.get_script("activate.bat");
             script = script.Replace("Wcoa", Wcoa);
             script = script.Replace("Ocoa", Ocoa);
-            System.IO.File.WriteAllText(@"D:\windows\IC\activate.bat", script);
+            System.IO.File.WriteAllText(@"W:\windows\IC\activate.bat", script);
             //w.WriteLine("cscript \"C:\\Windows\\System32\\slmgr.vbs\" /ipk " + Wcoa);
             //w.WriteLine("cscript \"C:\\Windows\\System32\\slmgr.vbs\" /ato");
             //w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /inpkey:" + Ocoa);
             //w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /act");
             //w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /dstatus");
-
-
+            var shutdown_script = Mysql_Data.get_script("shutdown.bat");
+            shutdown_script = script.Replace("Wcoa", Wcoa);
+            shutdown_script = script.Replace("Ocoa", Ocoa);
+            //System.IO.File.WriteAllText(@"W:\Windows\System32\shutdown.bat", shutdown_script);
+            System.IO.File.AppendAllText(@"W:\Windows\System32\shutdown.bat", shutdown_script);
             XmlDocument doc = new XmlDocument();
 
             
@@ -144,7 +147,7 @@ namespace modern_coas
            
 
 
-            await _dialogCoordinator.ShowMessageAsync(this, "DONE", "DONE");
+            await _dialogCoordinator.ShowMessageAsync(this, "Message", "DONE");
 
         }
 

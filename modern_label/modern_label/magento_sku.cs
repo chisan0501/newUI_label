@@ -42,10 +42,10 @@ namespace modern_label
 
 
         //generate the list of brand with index number for magento filterable attribute
-        public static Dictionary<string, int> brand_name()
+        public static Dictionary<string, string> brand_name()
         {
             var mysql_data = new Mysql_DataProvider(LabelViewModel.db_source);
-            Dictionary<string, int> brand_name = new Dictionary<string, int>();
+            Dictionary<string, string> brand_name = new Dictionary<string,string>();
             brand_name = mysql_data.sku_brand();
             return brand_name;
         }
@@ -1779,6 +1779,7 @@ namespace modern_label
         }
         public static string hdd_format(bool IsMagento, RefrubHistoryObj spec)
         {
+            
             List<int> hdd_list = new List<int>();
             hdd_list.Add(60);
             hdd_list.Add(80);
