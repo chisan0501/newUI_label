@@ -39,9 +39,9 @@ namespace modern_coas
 
                 }
             }
-            catch
+            catch(Exception e)
             {
-
+                MessageBox.Show(e.Message);
             }  
           
             InitializeComponent();

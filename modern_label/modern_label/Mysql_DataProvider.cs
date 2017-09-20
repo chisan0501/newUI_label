@@ -91,6 +91,31 @@ namespace modern_label
 
         }
 
+        public void write_to_event(string source, string content, string object_id)
+        {
+
+          
+
+            try
+            {
+
+                MySqlCommand command = conn.CreateCommand();
+                command.CommandText = "insert into event_log (source,content,obj_id) values ('" + source+ "','" + content + "','" + object_id + "')";
+                conn.Open();
+                command.ExecuteNonQuery();
+                conn.Close();
+                
+
+            }
+            catch(Exception e)
+            {
+               
+            }
+
+         
+
+        }
+
         public bool edit_discovery_data (discovery_result input,string asset_tag)
         {
             bool result = false;
@@ -796,7 +821,7 @@ namespace modern_label
 
         }
 
-        public List<string> channel_list() {
+        public List<string> channel_list(string type) {
 
 
            
@@ -804,7 +829,7 @@ namespace modern_label
 
             try
             {
-                String cmdText = "SELECT distinct name from label_menu order by name";
+                String cmdText = "SELECT distinct name from label_menu where type ='"+type+"' OR type = '0' order by name";
 
 
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, conn))

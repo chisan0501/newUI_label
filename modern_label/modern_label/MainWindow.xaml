@@ -375,7 +375,7 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="Bulk">
+            <TabItem Header="Bulk" IsEnabled="False">
                 <Grid>
                     <Grid.ColumnDefinitions>
 

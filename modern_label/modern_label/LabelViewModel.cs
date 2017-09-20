@@ -288,6 +288,7 @@ namespace modern_label
             LabelWriterPrintParams prms = new LabelWriterPrintParams(1, "print job 1", DYMO.Label.Framework.FlowDirection.LeftToRight, RollSelection.Auto, LabelWriterPrintQuality.BarcodeAndGraphics);
             current_label.Print(Selected_printer, prms);
             bool sucess = mysql_data.insert(RefrubHistoryObj);
+            mysql_data.write_to_event("refrub", RefrubHistoryObj.asset_tag.ToString() + " has been Refurbished by "+RefrubHistoryObj.refurbisher+" and assigned for Channel: "+ RefrubHistoryObj.channel + " with SKU " + RefrubHistoryObj.sku, RefrubHistoryObj.asset_tag.ToString());
         }
 
         public async void EditAction()
@@ -1677,7 +1678,8 @@ namespace modern_label
                 Grade_list = LabelModel.grade_list;
                 Rci_Input_type = LabelModel.rci_input_type;
                 Printer_list = LabelModel.printer_list;
-                channel_list = mysql_data.channel_list();
+                
+                //channel_list = mysql_data.channel_list();
                 _canExecute = true;
             
                 
@@ -1738,7 +1740,7 @@ namespace modern_label
                                 Enable_history_btn = true;
                                 db_source = "Online DB";
                                 mysql_data.change_connection_string(db_source);
-                                channel_list = mysql_data.channel_list();
+                                //channel_list = mysql_data.channel_list();
                               
                                 Users = mysql_data.users();
 
@@ -1752,7 +1754,7 @@ namespace modern_label
                                 Enable_history_btn = false;
                                 db_source = "Local DB";
                                 mysql_data.change_connection_string(db_source);
-                                channel_list = mysql_data.channel_list();
+                               // channel_list = mysql_data.channel_list();
                                 
                                 Users = mysql_data.users();
 
@@ -1818,6 +1820,7 @@ namespace modern_label
                         break;
                     case "Computer_type_selected":
                         Computer_type_status = "Computer Type : " + Computer_type_selected;
+                       
                         break;
                     case "Submit_asset":
 
@@ -1843,7 +1846,19 @@ namespace modern_label
                     case "Copy_discovery":
 
                          break;
+                    case "Computer_type_value":
+                        switch (Computer_type_value)
+                        {
+                            case "_DK":
+                                this.channel_list = mysql_data.channel_list("1");
+                                break;
 
+                            case "_LP":
+                                this.channel_list = mysql_data.channel_list("2");
+                                break;
+
+                        }
+                        break;
                     case "Label_model":
                         if (current_label != null)
                         {

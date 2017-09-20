@@ -130,7 +130,7 @@ namespace modern_label
             create.meta_title = spec.meta_title;
             create.meta_description = spec.meta_desc;
 
-            associativeEntity[] attributes = new associativeEntity[20];
+            associativeEntity[] attributes = new associativeEntity[18];
             attributes[0] = new associativeEntity();
             attributes[0].key = "cpu";
             attributes[0].value = spec.cpu;
@@ -167,30 +167,30 @@ namespace modern_label
             attributes[11] = new associativeEntity();
             attributes[11].key = "computer_manufacturer";
             attributes[11].value = spec.brand_dropdown;
+            //attributes[12] = new associativeEntity();
+            //attributes[12].key = "vendor_id";
+            //attributes[12].value = "4";
             attributes[12] = new associativeEntity();
-            attributes[12].key = "vendor_id";
-            attributes[12].value = "4";
+            attributes[12].key = "approval";
+            attributes[12].value = "2";
+            //attributes[14] = new associativeEntity();
+            //attributes[14].key = "vendor_sku";
+            //attributes[14].value = spec.sku;
             attributes[13] = new associativeEntity();
-            attributes[13].key = "approval";
-            attributes[13].value = "2";
+            attributes[13].key = "wireless";
+            attributes[13].value = spec.wireless;
             attributes[14] = new associativeEntity();
-            attributes[14].key = "vendor_sku";
-            attributes[14].value = spec.sku;
+            attributes[14].key = "grade";
+            attributes[14].value = spec.grade;
             attributes[15] = new associativeEntity();
-            attributes[15].key = "wireless";
-            attributes[15].value = spec.wireless;
+            attributes[15].key = "operating_system";
+            attributes[15].value = "162";
             attributes[16] = new associativeEntity();
-            attributes[16].key = "grade";
-            attributes[16].value = spec.grade;
+            attributes[16].key = "optical";
+            attributes[16].value = spec.optical_drive;
             attributes[17] = new associativeEntity();
-            attributes[17].key = "operating_system";
-            attributes[17].value = "162";
-            attributes[18] = new associativeEntity();
-            attributes[18].key = "optical";
-            attributes[18].value = spec.optical_drive;
-            attributes[19] = new associativeEntity();
-            attributes[19].key = "form_factor";
-            attributes[19].value = form_factor;
+            attributes[17].key = "form_factor";
+            attributes[17].value = form_factor;
 
             catalogProductAdditionalAttributesEntity additionalAttributes = new catalogProductAdditionalAttributesEntity();
             additionalAttributes.single_data = attributes;
@@ -216,7 +216,7 @@ namespace modern_label
             pic_data.file = img_data;
             pic_data.types = new string[] { "image", "small_image","thumbnail" };
             
-            mservice.catalogProductAttributeMediaCreate(mlogin, catid.ToString(), pic_data, "0", "product ID");
+            //mservice.catalogProductAttributeMediaCreate(mlogin, catid.ToString(), pic_data, "0", "product ID");
 
         }
 

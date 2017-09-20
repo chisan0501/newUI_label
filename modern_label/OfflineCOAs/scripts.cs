@@ -17,7 +17,7 @@ namespace modern_coas
         {
             try
             {
-                string path = "C:\\windows\\IC";
+                string path = "w:\\windows\\IC";
                 StreamReader zreader = new StreamReader(
                     path + "\\Config.bat");
                 String line = zreader.ReadToEnd();
@@ -38,7 +38,7 @@ namespace modern_coas
         {
             try
             {
-                string path = "C:\\windows\\IC";
+                string path = "w:\\windows\\IC";
                 
                 StreamReader zreader = new StreamReader(
                     path + "\\Config.bat");
@@ -63,7 +63,7 @@ namespace modern_coas
            try
             {
                 string script_content = Mysql_Data.get_script("preconfig.bat");
-                string path = "C:\\windows\\IC";
+                string path = "w:\\windows\\IC";
                 path = path+ "\\preconfig.bat";
                 StreamWriter batwriter = new StreamWriter(path);
                 batwriter.WriteLine(script_content);
@@ -85,7 +85,7 @@ namespace modern_coas
         
                 string script_content = Mysql_Data.get_script("Setup_Recovery_Partition_BIOS.cmd");
                 //string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            string path = "C:\\Windows\\IC\\Setup_Recovery_Partition_BIOS.cmd";
+            string path = "w:\\Windows\\IC\\Setup_Recovery_Partition_BIOS.cmd";
                 StreamWriter batwriter = new StreamWriter(path);
                 batwriter.WriteLine(script_content);
                 batwriter.Close();
@@ -96,7 +96,7 @@ namespace modern_coas
         {
             string script_content = Mysql_Data.get_script("oem_config.bat");
            
-            string path = "C:\\Windows\\IC\\config.bat";
+            string path = "w:\\Windows\\IC\\config.bat";
             StreamWriter batwriter = new StreamWriter(path);
             batwriter.WriteLine(script_content);
             batwriter.Close();
@@ -111,7 +111,7 @@ namespace modern_coas
                 script_content = script_content.Replace("set win-key=", "set win-key=" + wcoa);
                 script_content = script_content.Replace("set office-key=", "set office-key=" + ocoa);
               //  string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                string path = "C:\\Windows\\IC\\config.bat";
+                string path = "w:\\Windows\\IC\\config.bat";
                 StreamWriter batwriter = new StreamWriter(path);
 
 

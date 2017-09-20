@@ -12,7 +12,7 @@ namespace modern_label.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.1.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.3.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -20,16 +20,6 @@ namespace modern_label.Properties {
         public static Settings Default {
             get {
                 return defaultInstance;
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://connectall.org/index.php/api/v2_soap/index/")]
-        public string modern_label_org_connectall_MagentoService {
-            get {
-                return ((string)(this["modern_label_org_connectall_MagentoService"]));
             }
         }
         
@@ -46,10 +36,10 @@ namespace modern_label.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://dev.interconnection.org/index.php/api/v2_soap/index/")]
-        public string modern_label_org_interconnection_dev_MagentoService {
+        [global::System.Configuration.DefaultSettingValueAttribute("https://connectall.org/index.php/api/v2_soap/index/")]
+        public string modern_label_org_connectall_MagentoService {
             get {
-                return ((string)(this["modern_label_org_interconnection_dev_MagentoService"]));
+                return ((string)(this["modern_label_org_connectall_MagentoService"]));
             }
         }
     }

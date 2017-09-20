@@ -85,7 +85,7 @@ namespace modern_coas
 
         public void cleanup()   
         {
-            File.Delete("C:\\Windows\\IC\\config.bat");
+            File.Delete("w:\\Windows\\IC\\config.bat");
             
             Application.Current.MainWindow.Close();
         }
@@ -115,7 +115,7 @@ namespace modern_coas
             mysql_data.report(obj_onload, Oem_coa, "", Selected_station);
             var shutdown_script = Mysql_Data.get_script("oem_shutdown.bat");
                    
-            System.IO.File.AppendAllText(@"W:\Windows\System32\shutdown.bat", shutdown_script);
+            System.IO.File.AppendAllText(@"w:\Windows\System32\shutdown.bat", shutdown_script);
             await _dialogCoordinator.ShowMessageAsync(this, "Message", "All OEM Tasks Completed, Program will now Shutdown and Begins Backup");
             Application.Current.MainWindow.Close();
         }
@@ -129,7 +129,7 @@ namespace modern_coas
         }
 
 
-        //inject commmand into activate.bat and place it in w:\windows\IC
+        //inject commmand into activate.bat and place it in C:\windows\IC
         public async void beta_command_action()
         {
             Mar_enable = false;
@@ -137,7 +137,7 @@ namespace modern_coas
             var script = Mysql_Data.get_script("activate.bat");
             script = script.Replace("Wcoa", Wcoa);
             script = script.Replace("Ocoa", Ocoa);
-            System.IO.File.WriteAllText(@"W:\windows\IC\activate.bat", script);
+            System.IO.File.WriteAllText(@"w:\windows\IC\activate.bat", script);
             //w.WriteLine("cscript \"C:\\Windows\\System32\\slmgr.vbs\" /ipk " + Wcoa);
             //w.WriteLine("cscript \"C:\\Windows\\System32\\slmgr.vbs\" /ato");
             //w.WriteLine("cscript \"C:\\Program Files\\Microsoft Office\\Office14\\ospp.vbs\" /inpkey:" + Ocoa);
@@ -146,13 +146,13 @@ namespace modern_coas
             var shutdown_script = Mysql_Data.get_script("shutdown.bat");
             shutdown_script = shutdown_script.Replace("Wcoa", Wcoa);
             shutdown_script = shutdown_script.Replace("Ocoa", Ocoa);
-            //System.IO.File.WriteAllText(@"W:\Windows\System32\shutdown.bat", shutdown_script);
-            System.IO.File.AppendAllText(@"W:\Windows\System32\shutdown.bat", shutdown_script);
+            //System.IO.File.WriteAllText(@"C:\Windows\System32\shutdown.bat", shutdown_script);
+            System.IO.File.AppendAllText(@"w:\Windows\System32\shutdown.bat", shutdown_script);
 
             XmlDocument doc = new XmlDocument();
 
             
-            doc.Load("W:\\Windows\\Panther\\unattend.xml");
+            doc.Load("w:\\Windows\\Panther\\unattend.xml");
             XmlNode root = doc.DocumentElement;
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("bk", "urn:schemas-microsoft-com:unattend");
@@ -163,7 +163,7 @@ namespace modern_coas
             objKey.AppendChild(objKeyText);
             objKeyParent.InsertBefore(objKey, objKeyParent.ChildNodes.Item(0));
             
-            doc.Save("W:\\Windows\\Panther\\unattend.xml");
+            doc.Save("w:\\Windows\\Panther\\unattend.xml");
             
 
 
